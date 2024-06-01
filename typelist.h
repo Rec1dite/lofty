@@ -100,3 +100,10 @@ namespace lofty {
     };
 
 } // namespace lofty
+
+
+using namespace lofty;
+
+using List = TYPELIST_4(int, char, double, float);
+
+sci len = Length<NullType>::value;
