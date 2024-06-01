@@ -4,6 +4,7 @@ namespace lofty {
     #define TYPELIST_3(T1, T2, T3) Typelist<T1, TYPELIST_2(T2, T3)>
     #define TYPELIST_4(T1, T2, T3, T4) Typelist<T1, TYPELIST_3(T2, T3, T4)>
     #define TYPELIST_5(T1, T2, T3, T4, T5) Typelist<T1, TYPELIST_4(T2, T3, T4, T5)>
+    #define sci static constexpr int
 
     class NullType {};
     struct EmptyType {};
@@ -21,12 +22,12 @@ namespace lofty {
 
     template <>
     struct Length<NullType> {
-        enum { value = 0 };
+        sci value = 0;
     };
 
     template <class Head, class Tail>
     struct Length<Typelist<Head, Tail>> {
-        enum { value = 1 + Length<Tail>::value };
+        sci value = 1 + Length<Tail>::value;
     };
 
     // ========== TypeAt ==========
@@ -57,20 +58,20 @@ namespace lofty {
 
     template<class T>
     struct IndexOf<NullType, T> {
-        enum { value = -1 };
+        sci value = -1;
     };
 
     template<class Head, class Tail>
     struct IndexOf<Typelist<Head, Tail>, Head> {
-        enum { value = 0 };
+        sci value = 0;
     };
 
     template<class Head, class Tail, class T>
     struct IndexOf<Typelist<Head, Tail>, T> {
         private:
-            enum { temp = IndexOf<Tail, T>::value };
+            sci temp = IndexOf<Tail, T>::value;
         public:
-            enum { value = temp == -1 ? -1 : temp + 1 };
+            sci value = temp == -1 ? -1 : temp + 1;
     };
 
 
@@ -80,14 +81,22 @@ namespace lofty {
 
     // ========== Equals ==========
 
+    struct True {};
+    struct False {};
+
+    union Boolean {
+
+    };
+
+
     template <class T, class U>
     struct Equals {
-        enum { value = 0 };
+        using Result = False;
     };
 
     template <class T>
     struct Equals<T, T> {
-        enum { value = 1 };
+        using Result = True;
     };
 
 } // namespace lofty
