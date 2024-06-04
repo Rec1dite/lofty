@@ -9,8 +9,9 @@ namespace lofty {
     class Iterable {
         public:
             virtual Iterator& createIterator() = 0;
-    };
 
+
+    };
 };
 
 class MyConcreteIterator : public lofty::Iterator {

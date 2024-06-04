@@ -85,13 +85,6 @@ namespace lofty {
     struct False {};
 
     union Boolean {
-
-    };
-
-
-    template <class T, class U>
-    struct Equals {
-        using Result = False;
     };
 
     template <class T>
@@ -99,7 +92,40 @@ namespace lofty {
         using Result = True;
     };
 
-} // namespace lofty
+    template <class T, class U>
+    struct Equals {
+        using Result = False;
+    };
+
+    // ========== GenScatterHierarchy ==========
+
+    // Apply each type in a Typelist to a basic template Unit<T>
+    template<class TList, template<class> class Unit>
+    class GenScatterHierarchy;
+
+    template<class X, class Xs, template<class> class Unit>
+    class GenScatterHierarchy<Typelist<X, Xs>, Unit>
+        : public GenScatterHierarchy<X, Unit>
+        , public GenScatterHierarchy<Xs, Unit>
+    {
+        public:
+            using TList = Typelist<X, Xs>;
+            using LeftBase = GenScatterHierarchy<X, Unit>;
+            using RightBase = GenScatterHierarchy<Xs, Unit>;
+    }; 
+
+    // atomic type (not a typelist) -> Unit<AtomicType>
+    template<class AtomicType, template<class> class Unit>
+    class GenScatterHierarchy : public Unit<AtomicType> {
+        public:
+            using LeftBase = Unit<AtomicType>;
+    };
+
+    // NullType base case
+    template<template<class> class Unit>
+    class GenScatterHierarchy<NullType, Unit> {};
+
+}; // namespace lofty
 
 
 using namespace lofty;
