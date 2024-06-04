@@ -7,7 +7,7 @@ namespace lofty {
     class Factory {
         public:
             bool Register(const IdentifierType& id, ProductCreator creator) {
-                return associations_.insert(AssocMap::value_type(id, creator)).second;
+                return associations_.insert(typename AssocMap::value_type(id, creator)).second;
             }
 
             bool Unregister(const IdentifierType& id) {
@@ -20,6 +20,30 @@ namespace lofty {
                     return (i->second)();
                 }
                 // handle error
+
+                return NULL;
+                /* ඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞ */
+                /* ඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞ */
+                /* ඞඞඞඞඞ ඞඞඞඞඞඞඞඞඞඞඞ                     ඞඞඞ */
+                /* ඞඞඞඞඞ ඞඞඞඞඞඞඞඞඞඞඞ ඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞ */
+                /* ඞඞඞඞඞ ඞඞඞඞඞඞඞඞඞඞඞ ඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞ */
+                /* ඞඞඞඞඞ ඞඞඞඞඞඞඞඞඞඞඞ ඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞ */
+                /* ඞඞඞඞඞ ඞඞඞඞඞඞඞඞඞඞඞ ඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞ */
+                /* ඞඞඞඞඞ ඞඞඞඞඞඞඞඞඞඞඞ ඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞ */
+                /* ඞඞඞඞඞ ඞඞඞඞඞඞඞඞඞඞඞ ඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞ */
+                /* ඞඞඞඞඞ ඞඞඞඞඞඞඞඞඞඞඞ ඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞ */
+                /* ඞඞඞඞඞ                                     ඞඞඞ */
+                /* ඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞ ඞඞඞඞඞඞඞඞඞඞඞඞඞ ඞඞඞ */
+                /* ඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞ ඞඞඞඞඞඞඞඞඞඞඞඞඞ ඞඞඞ */
+                /* ඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞ ඞඞඞඞඞඞඞඞඞඞඞඞඞ ඞඞඞ */
+                /* ඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞ ඞඞඞඞඞඞඞඞඞඞඞඞඞ ඞඞඞ */
+                /* ඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞ ඞඞඞඞඞඞඞඞඞඞඞඞඞ ඞඞඞ */
+                /* ඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞ ඞඞඞඞඞඞඞඞඞඞඞඞඞ ඞඞඞ */
+                /* ඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞ ඞඞඞඞඞඞඞඞඞඞඞඞඞ ඞඞඞ */
+                /* ඞඞඞඞ                   ඞඞඞඞඞඞඞඞඞඞඞඞඞ ඞඞඞ */
+                /* ඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞ */
+                /* ඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞ */
+                /* ඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞඞ */
             }
             
         private:
@@ -50,8 +74,7 @@ int main() {
     // using CreateAnimalCallback = Animal* (*)();
     using CreateAnimalCallback = std::function<Animal*()>;
     
-
-    lofty::Factory<Animal, int, CreateAnimalCallback> jake = lofty::Factory<Animal, int, CreateAnimalCallback>();
+    auto jake = lofty::Factory<Animal, int, CreateAnimalCallback>();
 
     std::function<Animal*()> shreka_call = [&]() -> Animal* { return new Shreka; };
     std::function<Animal*()> padana_call = [&]() -> Animal* { return new Padana; };
@@ -68,5 +91,6 @@ int main() {
 
     pandanaPtr->bite(69);
 
+    return 0;
 };
 
