@@ -51,6 +51,10 @@ namespace hey {
                         current = StepPolicy<TValue>::step(current);
                         return *this;
                     }
+
+                    int operator*() {
+                        return *current;
+                    }
             };
 
         virtual iterator<> begin() = 0;
@@ -122,10 +126,10 @@ int main() {
     Array2 arr2(10);
     Array2::iterator itr2 = arr2.begin();
 
-    // Array arr(10);
-    // Array::iterator<> itr = arr.begin();
+    Array arr(10);
+    Array::iterator<DefaultStepPolicy> itr = arr.begin();
 
-    cout << "Current Value: " << *itr2 << endl;
+    cout << "Current Value: " << *itr << endl;
 
     return 0;
 }
