@@ -11,65 +11,94 @@ namespace lofty {
 
     // Use policy to define how to iterate through a structure (to be converted to Visitor)
     // ValueType is the type of a single item within the Iterable (that can be pointed to)
-    template<class ConcreteIterable, class ValueType>
-    class IteratorPolicy {
-        public:
-            // Describes how to move from one item in the iterable to the next
-            static virtual void step(ConcreteIterable) = 0; // TODO: Make this a Visitor
-            // Determines whether we have reached the end yet or not
-            static virtual bool hasReachedEnd(ConcreteIterable) = 0;
-    };
+    // template<class ConcreteIterable, class ValueType>
 
-    template<template <class ValueType> class Policy, class ConcreteIterable, class ValueType>
+    // Use Curiously Recursive Template Pattern to enforce definition of step() and hasReachedEnd() in derived classes
+    // template<class CRTPDerivedPolicy, class ConcreteIterator>
+    // class IteratorPolicy {
+    //     public:
+    //         // Describes how to move from one item in the iterable to the next
+    //         static void step(ConcreteIterator iterator) {
+    //             CRTPDerivedPolicy::_step(iterator);
+    //         }
+    //         // Determines whether we have reached the end yet or not
+    //         static bool hasReachedEnd(ConcreteIterator iterator) {
+    //             return CRTPDerivedPolicy::_hasReachedEnd(iterator);
+    //         }
+
+    //         // static virtual void step(ConcreteIterable) = 0; // TODO: Make this a Visitor
+    //         // static virtual bool hasReachedEnd(ConcreteIterable) = 0;
+    // };
+
+    template<class ValueType>
     class Iterator {
+        Visitor& visitor;
+
         public:
-            virtual ValueType getNext() = 0;
-            virtual bool hasMore() = 0;
+            void accept(Visitor& visitor) {
+                this->visitor = visitor;
+            }
+
+            ValueType getNext() {
+                visitor->getNext(this);
+            };
+
+            bool hasMore() {
+                visitor->hasMore(this);
+            };
     };
 
-    template<template<template <class Val> class Pol> class ConcreteIterator>
+    template<class ConcreteIterator, class ValueType>
     class Iterable {
         public:
-            template<template <class ValueType> class Policy>
-            ConcreteIterator<Policy<ValueType>> createIterator() {
-                return ConcreteIterator<Policy<ValueType>>();
+
+            template <class ConcreteVisitor>
+            ConcreteIterator createIterator() {
+                ConcreteIterator res();
+                res->accept(ConcreteVisitor());
+
+                // return ConcreteIterator<Policy>();
             }
+    };
+
+  
+    template<class ValueType>
+    class Visitor {
+        public:
+            virtual void getNext(Iterator<ValueType> iterator) = 0;
+            virtual bool hasMore(Iterator<ValueType> iterator) = 0;
     };
 
     //========== Concrete Policies ==========//
 
-    // Policy to loop from vector index 0 to end of vector
-    template <class ValueType>
-    class VectorForwardPolicy : IteratorPolicy<ValueType> {
-        // Required for every policy
-        static void step() {};
-        static bool hasReachedEnd() {};
-        // PANDA HAS ARRIVED!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 🐼🐼 He cant save u
-        // (DISASTER STRIKES!)
-        
+    class VectorForwardVisitor : public Visitor<int> {
+        void visit() {
+            std::cout << "Visiting VectorForwardVisitor" << std::endl;
+        }
     };
+
+    // Policy to loop from vector index 0 to end of vector
+    // class VectorForwardPolicy : IteratorPolicy<VectorForwardPolicy> {
+    //     // Required for every policy
+    //     static void _step() {
+            
+    //     };
+    //     static bool _hasReachedEnd() { return false; };
+    // };
 
     // Policy to loop from end of vector back to start
-    template <class ValueType>
-    class VectorBackwardsPolicy : IteratorPolicy<ValueType> {
-        // Required for every policy
-        void step() {};
-        bool hasReachedEnd() {};
-    };
-    
-    template<template <class ValueType> class Policy>
-    class VectorIterator : Iterator<Policy<ValueType>, Vector, ValueType> {
-        public:
-            int getNext() {
-                return 0;
-            };
+    // class VectorBackwardsPolicy : IteratorPolicy<VectorBackwardsPolicy> {
+    //     // Required for every policy
+    //     void _step(IntVecIterator iterator) {
 
-            bool hasMore() {
-                return true;
-            };
+    //     };
+    //     bool _hasReachedEnd(IntVecIterator iterator) { return false; };
+    // };
+
+    class VectorIterator : Iterator<int> {
     };
 
-    class Vector : public Iterable<VectorIterator> {
+    class Vector : public Iterable<VectorIterator, int> {
         int* data;
         int size;
 
@@ -86,9 +115,10 @@ int main() {
     using namespace lofty;
 
     int* data = new int[10] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+
     Vector vec1(data, 10);
 
-    auto iter = vec1.createIterator<VectorForwardPolicy>();
+    auto iter = vec1.createIterator<VectorForwardVisitor>();
 
     while(iter.hasMore()) {
         std::cout << iter.getNext() << std::endl;
@@ -147,4 +177,12 @@ namespace test {
 //                \\              \\                   //
 //                 L\              L\                  //
 // "All porg are equal, but some porg are more equal then others"
-//  - Peorge Porgwell (Porg Fram) - 1945                        
+//  - Peorge Porgwell (Porg Fram) - 1945 
+
+
+// Its just me and Porg over here, tuff times are lasting.
+// Dino hasnt spoken to a human in over 50 days. ;(
+// I fear for his sanity
+// What will become of us, now that we are stuck here with him.
+// If only he were to commit this code, then Porg will bless the codebase. 
+             
