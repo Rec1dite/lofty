@@ -30,51 +30,70 @@ namespace lofty {
     //         // static virtual bool hasReachedEnd(ConcreteIterable) = 0;
     // };
 
+    //---------- Forward declarations ----------//
+    template<class ValueType>
+    class Iterator;
+  
+    template<class ValueType>
+    class Visitor {
+        public:
+            virtual ValueType getNext(Iterator<ValueType>* iterator) = 0;
+            virtual bool hasMore(Iterator<ValueType>* iterator) = 0;
+    };
+
     template<class ValueType>
     class Iterator {
-        Visitor& visitor;
+        using VisitorType = Visitor<ValueType>;
+
+        VisitorType* visitor;
+
+        protected:
+            Iterator() : visitor(nullptr) {}
+            ~Iterator() { if (visitor) { delete visitor; } }
 
         public:
-            void accept(Visitor& visitor) {
+            using ValType = ValueType;
+
+            void accept(VisitorType* visitor) {
                 this->visitor = visitor;
             }
 
             ValueType getNext() {
-                visitor->getNext(this);
+                return visitor->getNext(this);
             };
 
             bool hasMore() {
-                visitor->hasMore(this);
+                return visitor->hasMore(this);
             };
     };
 
-    template<class ConcreteIterator, class ValueType>
+    template<template <class> class ConcreteIterator, class ValueType>
     class Iterable {
         public:
+            using ValType = ValueType;
 
             template <class ConcreteVisitor>
-            ConcreteIterator createIterator() {
-                ConcreteIterator res();
-                res->accept(ConcreteVisitor());
+            ConcreteIterator<ValueType>* createIterator() {
+                ConcreteIterator<ValueType>* res = new ConcreteIterator<ValueType>();
+
+                res->accept(new ConcreteVisitor());
+
+                return res;
 
                 // return ConcreteIterator<Policy>();
             }
     };
 
-  
-    template<class ValueType>
-    class Visitor {
-        public:
-            virtual void getNext(Iterator<ValueType> iterator) = 0;
-            virtual bool hasMore(Iterator<ValueType> iterator) = 0;
-    };
-
     //========== Concrete Policies ==========//
 
+    template<class ValueType>
+    class VectorIterator : public Iterator<ValueType> {
+    };
+
     class VectorForwardVisitor : public Visitor<int> {
-        void visit() {
-            std::cout << "Visiting VectorForwardVisitor" << std::endl;
-        }
+        public:
+            int getNext(Iterator<int>* iterator) { return 0; }
+            bool hasMore(Iterator<int>* iterator) { return true; }
     };
 
     // Policy to loop from vector index 0 to end of vector
@@ -95,8 +114,6 @@ namespace lofty {
     //     bool _hasReachedEnd(IntVecIterator iterator) { return false; };
     // };
 
-    class VectorIterator : Iterator<int> {
-    };
 
     class Vector : public Iterable<VectorIterator, int> {
         int* data;
@@ -120,8 +137,8 @@ int main() {
 
     auto iter = vec1.createIterator<VectorForwardVisitor>();
 
-    while(iter.hasMore()) {
-        std::cout << iter.getNext() << std::endl;
+    while(iter->hasMore()) {
+        std::cout << iter->getNext() << std::endl;
     }
 
     return 0;
@@ -129,34 +146,34 @@ int main() {
 
 
 
-namespace test {
-    // template <long TO, long FROM>
+// namespace test {
+//     // template <long TO, long FROM>
 
-    template< class Category, class T, class Distance = T, class Pointer = T* >
-    class iterator {
-        long porg;
+//     template< class Category, class T, class Distance = T, class Pointer = T* >
+//     class iterator {
+//         long porg;
 
-        public:
-            iterator(T _porg) : prog(_porg) {}
+//         public:
+//             iterator(T _porg) : prog(_porg) {}
 
-            iterator& operator++() { num = TO >= FROM ? num + 1: num - 1; return *this; }
-            // iterator operator++(int) { iterator retval = *this; ++(*this); return retval; }
+//             iterator& operator++() { num = TO >= FROM ? num + 1: num - 1; return *this; }
+//             // iterator operator++(int) { iterator retval = *this; ++(*this); return retval; }
 
-            // bool operator==(iterator other) const { return num == other.num; }
-            // bool operator!=(iterator other) const { return !(*this == other); }
+//             // bool operator==(iterator other) const { return num == other.num; }
+//             // bool operator!=(iterator other) const { return !(*this == other); }
 
-            // long operator*() { return num; }
+//             // long operator*() { return num; }
 
-            // iterator traits
-            using difference_type = long;
-            using value_type = long;
-            using pointer = const long*;
-            // using iterator_category = std::forward_iterator_tag;
-    };
+//             // iterator traits
+//             using difference_type = long;
+//             using value_type = long;
+//             using pointer = const long*;
+//             // using iterator_category = std::forward_iterator_tag;
+//     };
 
-    // iterator begin() { return FROM; }
-    // iterator end() { return TO >= FROM? TO+1 : TO-1; }
-};
+//     // iterator begin() { return FROM; }
+//     // iterator end() { return TO >= FROM? TO+1 : TO-1; }
+// };
 
 
 
