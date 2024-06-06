@@ -44,8 +44,7 @@ class Iterator {
         };
 
         bool hasMore() {
-            // return true;
-            return Policy::_hasReachedEnd(static_cast<ConcIter*>(this), this->structure);
+            return !Policy::_hasReachedEnd(static_cast<ConcIter*>(this), this->structure);
         };
 };
 
@@ -80,12 +79,10 @@ template<class Policy>
 class VectorIterator : public Iterator<VectorIterator, Vector, int, Policy> {
     private:
         int index;
-        // Vector* structure;
 
     public:
         VectorIterator(Vector* vec)
-            // : Iterator<Vector, int, Policy>(vec), index(0) //
-            : Iterator<VectorIterator, Vector, int, Policy>(vec), index(0) //
+            : Iterator<VectorIterator, Vector, int, Policy>(vec), index(0)
         {}
 
     friend class VectorForwardPolicy;
