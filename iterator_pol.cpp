@@ -19,33 +19,35 @@ template<class BaseClass>
 class InheritedClass : public BaseClass {};
 
 //---------- Forward declarations ----------//
-template<class, class, class> class Iterator;
+template<template<class> class, class, class, class> class Iterator;
 template<template<class> class, class, class> class Structure;
 template<class> class VectorIterator;
 class VectorForwardPolicy;
 class Vector;
 
-// template<class ConcreteStructure, class ValueType, class Policy>
-// class Iterator {
+template<template<class Pol> class ConcreteIterator, class ConcreteStructure, class ValueType, class Policy>
+class Iterator {
 
-//     private:
-//         ConcreteStructure* structure;
+    private:
+        ConcreteStructure* structure;
 
-//     public:
-//         using ValType = ValueType;
-//         using PolType = Policy;
+    public:
+        using ValType = ValueType;
+        using PolType = Policy;
+        using ConcIter = ConcreteIterator<Policy>;
 
-//         Iterator(ConcreteStructure* iterble) : structure(iterble) {}
+        Iterator(ConcreteStructure* iterble) : structure(iterble) {}
 
-//         virtual ValueType getNext() {
-//             Policy::_step(this, this->structure);
-//             return 0;
-//         };
+        ValueType getNext() {
+            // Policy::_step(this, this->structure);
+            return 0;
+        };
 
-//         virtual bool hasMore() {
-//             return Policy::_hasReachedEnd(this, this->structure);
-//         };
-// };
+        bool hasMore() {
+            // return true;
+            return Policy::_hasReachedEnd(static_cast<ConcIter*>(this), this->structure);
+        };
+};
 
 // Uses CRTP for ConcreteStructure
 template<template<class> class ConcreteIterator, class ConcreteStructure, class ValueType>
@@ -54,8 +56,6 @@ class Structure {
         // using IteratorType = InheritedClass<Iterator<ValueType>>;
         // template<class ConcPol>
         // using IteratorType = ConcreteIterator<ConcreteStructure, ValueType, ConcPol>;
-
-        // using IteratorType = ConcreteIterator<ConcPol>;
 
 
         // TODO: Look into generating the class directly inside the iterable
@@ -77,25 +77,16 @@ class Structure {
 
 // TODO: VectorIterator should take a TypeList of config types E.g. ValType, StepType, EndType
 template<class Policy>
-class VectorIterator {
+class VectorIterator : public Iterator<VectorIterator, Vector, int, Policy> {
     private:
         int index;
-        Vector* structure;
+        // Vector* structure;
 
     public:
         VectorIterator(Vector* vec)
-            // : Iterator<Vector, int, Policy>(vec)
-            : structure(vec), index(0)
+            // : Iterator<Vector, int, Policy>(vec), index(0) //
+            : Iterator<VectorIterator, Vector, int, Policy>(NULL), index(0) //
         {}
-
-        int getNext() {
-            Policy::_step(this, this->structure);
-            return index;
-        };
-
-        bool hasMore() {
-            return !Policy::_hasReachedEnd(this, this->structure);
-        };
 
     friend class VectorForwardPolicy;
 };
@@ -120,11 +111,13 @@ class VectorForwardPolicy {
 
     public:
         // Required for every policy
+        // template<class IteratorType>
         static void _step(VectorIterator<This>* iterator, Vector* vec) {
             if (iterator->index < vec->size) { iterator->index++; }
         };
 
         // Required for every policy
+        // template<class IteratorType>
         static bool _hasReachedEnd(VectorIterator<This>* iterator, Vector* vec) {
             return iterator->index >= vec->size;
         };
