@@ -6,134 +6,137 @@
 // 3) Create one or more policies which define _how_ to iterate through the data structure. Each inherits from IteratorPolicy<>
 // 4) Pass the policy into the Iterator<> to create a new Iterator<YourPolicy> class which can be used to iterate through the structure
 
-namespace lofty {
-    //========== Interfaces ==========//
-
-    // Use policy to define how to iterate through a structure (to be converted to Visitor)
-    // ValueType is the type of a single item within the Structure (that can be pointed to)
-    // template<class ConcreteStructure, class ValueType>
-
-    template<class BaseClass>
-    class InheritedClass : public BaseClass {};
-
-    //---------- Forward declarations ----------//
-    template<class, class, class> class Iterator;
-    template<template<class> class, class, class> class Structure;
-    template<class> class VectorIterator;
-    class VectorForwardPolicy;
-    class Vector;
-
-    // template<class ConcreteStructure, class ValueType, class Policy>
-    // class Iterator {
-
-    //     private:
-    //         ConcreteStructure* structure;
-
-    //     public:
-    //         using ValType = ValueType;
-    //         using PolType = Policy;
-
-    //         Iterator(ConcreteStructure* iterble) : structure(iterble) {}
-
-    //         virtual ValueType getNext() {
-    //             Policy::_step(this, this->structure);
-    //             return 0;
-    //         };
-
-    //         virtual bool hasMore() {
-    //             return Policy::_hasReachedEnd(this, this->structure);
-    //         };
-    // };
-
-    // Uses CRTP for ConcreteStructure
-    template<template<class> class ConcreteIterator, class ConcreteStructure, class ValueType>
-    class Structure {
-        public:
-            // using IteratorType = InheritedClass<Iterator<ValueType>>;
-            // template<class ConcPol>
-            // using IteratorType = ConcreteIterator<ConcreteStructure, ValueType, ConcPol>;
-
-            // using IteratorType = ConcreteIterator<ConcPol>;
+using namespace std;
 
 
-            // TODO: Look into generating the class directly inside the iterable
-            // Then could probide a template parameter to Structure<> which defaults to NullType
-            // If the user provides a class to this parameter, then it uses that as the ConcreteIterator instead
-            // template<class ConcretePolicy>
-            // class CustomIterator : public Iterator<ConcreteStructure, ValueType, ConcretePolicy> {
-            // };
+//========== Interfaces ==========//
 
-            template <class ConcretePolicy>
-            // ConcreteIterator<ConcretePolicy>* createIterator() { //
-            VectorIterator<VectorForwardPolicy>* createIterator() {
-                // return new ConcreteIterator<ConcretePolicy>(this); //
-                return new VectorIterator<VectorForwardPolicy>(this);
-            }
-    };
+// Use policy to define how to iterate through a structure (to be converted to Visitor)
+// ValueType is the type of a single item within the Structure (that can be pointed to)
+// template<class ConcreteStructure, class ValueType>
 
-    //========== Concrete Policies ==========//
-    // Use GenScatterHierarchy to build a unified policy from a set of other policies
-    // E.g. First policy defines getNext(), 2nd defines hasMore(), etc.
+template<class BaseClass>
+class InheritedClass : public BaseClass {};
 
-    // TODO: VectorIterator should take a TypeList of config types E.g. ValType, StepType, EndType
-    template<class Policy>
-    class VectorIterator {
-        private:
-            int index;
-            Vector* structure;
+//---------- Forward declarations ----------//
+template<class, class, class> class Iterator;
+template<template<class> class, class, class> class Structure;
+template<class> class VectorIterator;
+class VectorForwardPolicy;
+class Vector;
 
-        public:
-            VectorIterator(Vector* vec)
-                // : Iterator<Vector, int, Policy>(vec)
-                : index(0)
-            {}
+// template<class ConcreteStructure, class ValueType, class Policy>
+// class Iterator {
 
-            int getNext() {
-                Policy::_step(this, this->structure);
-                return 0;
-            };
+//     private:
+//         ConcreteStructure* structure;
 
-            bool hasMore() {
-                return Policy::_hasReachedEnd(this, this->structure);
-            };
+//     public:
+//         using ValType = ValueType;
+//         using PolType = Policy;
 
-        friend class VectorForwardPolicy;
-    };
+//         Iterator(ConcreteStructure* iterble) : structure(iterble) {}
 
-    class Vector : public Structure<VectorIterator, Vector, int> {
-        int* data;
-        int size;
+//         virtual ValueType getNext() {
+//             Policy::_step(this, this->structure);
+//             return 0;
+//         };
 
-        public:
-            Vector(int* data, int size) {
-                this->size = size;
-                this->data = new int[size];
-                for (int i = 0; i < size; i++) { this->data[i] = data[i]; }
-            }
+//         virtual bool hasMore() {
+//             return Policy::_hasReachedEnd(this, this->structure);
+//         };
+// };
 
-        friend class VectorForwardPolicy;
-    };
+// Uses CRTP for ConcreteStructure
+template<template<class> class ConcreteIterator, class ConcreteStructure, class ValueType>
+class Structure {
+    public:
+        // using IteratorType = InheritedClass<Iterator<ValueType>>;
+        // template<class ConcPol>
+        // using IteratorType = ConcreteIterator<ConcreteStructure, ValueType, ConcPol>;
 
-    // Policy to loop from vector index 0 to end of vector
-    class VectorForwardPolicy {
-        using This = VectorForwardPolicy;
+        // using IteratorType = ConcreteIterator<ConcPol>;
 
-        public:
-            // Required for every policy
-            static void _step(VectorIterator<This>* iterator, Vector* vec) {
-                if (iterator->index < vec->size) { iterator->index++; }
-            };
 
-            // Required for every policy
-            static bool _hasReachedEnd(VectorIterator<This>* iterator, Vector* vec) {
-                return iterator->index >= vec->size;
-            };
-    };
+        // TODO: Look into generating the class directly inside the iterable
+        // Then could probide a template parameter to Structure<> which defaults to NullType
+        // If the user provides a class to this parameter, then it uses that as the ConcreteIterator instead
+        // template<class ConcretePolicy>
+        // class CustomIterator : public Iterator<ConcreteStructure, ValueType, ConcretePolicy> {
+        // };
+
+        template <class ConcretePolicy>
+        // ConcreteIterator<ConcretePolicy>* createIterator() { //
+        VectorIterator<VectorForwardPolicy>* createIterator() {
+            // return new ConcreteIterator<ConcretePolicy>(this); //
+            return new VectorIterator<VectorForwardPolicy>(this);
+        }
 };
 
-int main() {
-    using namespace lofty;
+//========== Concrete Policies ==========//
+// Use GenScatterHierarchy to build a unified policy from a set of other policies
+// E.g. First policy defines getNext(), 2nd defines hasMore(), etc.
 
+// TODO: VectorIterator should take a TypeList of config types E.g. ValType, StepType, EndType
+template<class Policy>
+class VectorIterator {
+    private:
+        int index;
+        Vector* structure;
+
+    public:
+        VectorIterator(Vector* vec)
+            // : Iterator<Vector, int, Policy>(vec)
+            : structure(vec), index(0)
+        {}
+
+        int getNext() {
+            Policy::_step(this, this->structure);
+            return index;
+        };
+
+        bool hasMore() {
+            return !Policy::_hasReachedEnd(this, this->structure);
+        };
+
+    friend class VectorForwardPolicy;
+};
+
+class Vector : public Structure<VectorIterator, Vector, int> {
+    int* data;
+    int size;
+
+    public:
+        Vector(int* data, int size) {
+            this->size = size;
+            this->data = new int[size];
+            for (int i = 0; i < size; i++) { this->data[i] = data[i]; }
+        }
+
+    friend class VectorForwardPolicy;
+};
+
+// Policy to loop from vector index 0 to end of vector
+class VectorForwardPolicy {
+    using This = VectorForwardPolicy;
+
+    public:
+        // Required for every policy
+        static void _step(VectorIterator<This>* iterator, Vector* vec) {
+            if (iterator->index < vec->size) { iterator->index++; }
+        };
+
+        // Required for every policy
+        static bool _hasReachedEnd(VectorIterator<This>* iterator, Vector* vec) {
+            return iterator->index >= vec->size;
+        };
+};
+
+
+
+//========== Usage ==========//
+
+int main() {
     int* data = new int[10] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
 
     Vector* vec1 = new Vector(data, 10);
