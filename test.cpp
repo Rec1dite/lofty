@@ -22,3 +22,25 @@ int main() {
     C<A<B>> c;
     return 0;
 }
+
+
+
+template<class Z>
+class X {
+    private:
+        int a;
+    protected:
+        int b;
+    public:
+        int c;
+    
+    friend class Y;
+};
+
+class X<float> {
+};
+
+class Y {
+    void test(X<int>* x) {
+    }
+};

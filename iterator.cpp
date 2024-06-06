@@ -37,8 +37,8 @@ namespace lofty {
     template<class ValueType>
     class Visitor {
         public:
-            virtual ValueType getNext(Iterator<ValueType>* iterator) = 0;
-            virtual bool hasMore(Iterator<ValueType>* iterator) = 0;
+            virtual ValueType _getNext(Iterator<ValueType>* iterator) = 0;
+            virtual bool _hasMore(Iterator<ValueType>* iterator) = 0;
     };
 
     template<class ValueType>
@@ -59,12 +59,14 @@ namespace lofty {
             }
 
             ValueType getNext() {
-                return visitor->getNext(this);
+                return visitor->_getNext(this);
             };
 
             bool hasMore() {
-                return visitor->hasMore(this);
+                return visitor->_hasMore(this);
             };
+        
+        // friend class Visitor;
     };
 
     template<template <class> class ConcreteIterator, class ValueType>
@@ -85,15 +87,33 @@ namespace lofty {
     };
 
     //========== Concrete Policies ==========//
+    // Use GenScatterHierarchy to build a unified policy from a set of other policies
+    // E.g. First policy defines getNext(), 2nd defines hasMore(), etc.
 
     template<class ValueType>
     class VectorIterator : public Iterator<ValueType> {
+        // TODO: Allow VectorForwardVisitor access to internal state
+        private:
+            int a;
+        // protected:
+        //     int b;
+        // public:
+        //     int c;
+
+        friend class VectorForwardVisitor;
     };
 
     class VectorForwardVisitor : public Visitor<int> {
         public:
-            int getNext(Iterator<int>* iterator) { return 0; }
-            bool hasMore(Iterator<int>* iterator) { return true; }
+            int _getNext(Iterator<int>* iterator) {
+                int x = ((VectorIterator<int>*)iterator)->a;
+                // x = iterator->b;
+                // x = iterator->c;
+                return 0;
+            }
+            bool _hasMore(Iterator<int>* iterator) {
+                return true;
+            }
     };
 
     // Policy to loop from vector index 0 to end of vector
