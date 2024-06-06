@@ -39,7 +39,7 @@ class Iterator {
         Iterator(ConcreteStructure* iterble) : structure(iterble) {}
 
         ValueType getNext() {
-            // Policy::_step(this, this->structure);
+            Policy::_step(static_cast<ConcIter*>(this), this->structure);
             return 0;
         };
 
@@ -85,7 +85,7 @@ class VectorIterator : public Iterator<VectorIterator, Vector, int, Policy> {
     public:
         VectorIterator(Vector* vec)
             // : Iterator<Vector, int, Policy>(vec), index(0) //
-            : Iterator<VectorIterator, Vector, int, Policy>(NULL), index(0) //
+            : Iterator<VectorIterator, Vector, int, Policy>(vec), index(0) //
         {}
 
     friend class VectorForwardPolicy;
