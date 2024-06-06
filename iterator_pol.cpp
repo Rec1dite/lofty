@@ -28,7 +28,7 @@ class Vector;
 template<template<class Pol> class ConcreteIterator, class ConcreteStructure, class ValueType, class Policy>
 class Iterator {
 
-    private:
+    protected:
         ConcreteStructure* structure;
 
     public:
@@ -38,9 +38,11 @@ class Iterator {
 
         Iterator(ConcreteStructure* iterble) : structure(iterble) {}
 
+        virtual ValueType getCurrent() = 0;
+
         ValueType getNext() {
             Policy::_step(static_cast<ConcIter*>(this), this->structure);
-            return 0;
+            return getCurrent();
         };
 
         bool hasMore() {
@@ -52,11 +54,6 @@ class Iterator {
 template<template<class> class ConcreteIterator, class ConcreteStructure, class ValueType>
 class Structure {
     public:
-        // using IteratorType = InheritedClass<Iterator<ValueType>>;
-        // template<class ConcPol>
-        // using IteratorType = ConcreteIterator<ConcreteStructure, ValueType, ConcPol>;
-
-
         // TODO: Look into generating the class directly inside the iterable
         // Then could probide a template parameter to Structure<> which defaults to NullType
         // If the user provides a class to this parameter, then it uses that as the ConcreteIterator instead
@@ -83,9 +80,17 @@ class VectorIterator : public Iterator<VectorIterator, Vector, int, Policy> {
     public:
         VectorIterator(Vector* vec)
             : Iterator<VectorIterator, Vector, int, Policy>(vec), index(0)
-        {}
+        {
+            Policy::_goToStart(this, vec);
+        }
 
+        int getCurrent() {
+            return this->structure->at(index);
+        }
+
+    // TODO: Look into generating these automatically using a TypeList
     friend class VectorForwardPolicy;
+    friend class VectorBackwardsPolicy;
 };
 
 class Vector : public Structure<VectorIterator, Vector, int> {
@@ -99,14 +104,22 @@ class Vector : public Structure<VectorIterator, Vector, int> {
             for (int i = 0; i < size; i++) { this->data[i] = data[i]; }
         }
 
+        int at(int index) {
+            return this->data[index];
+        }
+
     friend class VectorForwardPolicy;
+    friend class VectorBackwardsPolicy;
 };
 
-// Policy to loop from vector index 0 to end of vector
 class VectorForwardPolicy {
     using This = VectorForwardPolicy;
 
     public:
+        static void _goToStart(VectorIterator<This>* iterator, Vector* vec) {
+            iterator->index = 0;
+        };
+
         // Required for every policy
         // template<class IteratorType>
         static void _step(VectorIterator<This>* iterator, Vector* vec) {
@@ -120,6 +133,28 @@ class VectorForwardPolicy {
         };
 };
 
+// Policy to loop from end of vector to start
+class VectorBackwardsPolicy {
+    using This = VectorBackwardsPolicy;
+
+    public:
+        static void _goToStart(VectorIterator<This>* iterator, Vector* vec) {
+            iterator->index = vec->size - 1;
+        };
+
+        // Required for every policy
+        // template<class IteratorType>
+        static void _step(VectorIterator<This>* iterator, Vector* vec) {
+            if (iterator->index > 0) { iterator->index--; }
+        };
+
+        // Required for every policy
+        // template<class IteratorType>
+        static bool _hasReachedEnd(VectorIterator<This>* iterator, Vector* vec) {
+            return iterator->index <= 0;
+        };
+};
+
 
 
 //========== Usage ==========//
@@ -129,14 +164,17 @@ int main() {
 
     Vector* vec1 = new Vector(data, 10);
 
-    auto iter = vec1->createIterator<VectorForwardPolicy>(); //
-    // auto iter = new VectorIterator<VectorForwardPolicy>(vec1);
+    auto iterF = vec1->createIterator<VectorForwardPolicy>();
+    auto iterB = vec1->createIterator<VectorBackwardsPolicy>();
 
-    // auto iter1 = vec1.createIterator<APolicy>();
-    // auto iter2 = vec1.createIterator<BPolicy>();
-
-    while(iter->hasMore()) {
-        std::cout << iter->getNext() << std::endl;
+    while(iterF->hasMore()) {
+        std::cout << iterF->getCurrent() << std::endl;
+        iterF->getNext();
+    }
+    std::cout << "====================" << std::endl;
+    while(iterB->hasMore()) {
+        std::cout << iterB->getCurrent() << std::endl;
+        iterB->getNext();
     }
 
     return 0;

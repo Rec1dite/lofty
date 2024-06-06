@@ -24,23 +24,23 @@ int main() {
 }
 
 
+class U {};
 
-template<class Z>
+template<class Z, class W>
 class X {
-    private:
-        int a;
-    protected:
-        int b;
-    public:
-        int c;
+    private:    int a;
+    protected:  int b;
+    public:     int c;
     
     friend class Y;
+    // friend class W;
+    // NOTE: Might have to use a macro to generate these
 };
 
-class X<float> {
-};
+// template<>
+// class X<float> {};
 
 class Y {
-    void test(X<int>* x) {
+    void test(X<int, U>* x) {
     }
 };
