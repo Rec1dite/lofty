@@ -23,27 +23,27 @@ namespace lofty {
     class VectorForwardPolicy;
     class Vector;
 
-    template<class ConcreteStructure, class ValueType, class Policy>
-    class Iterator {
+    // template<class ConcreteStructure, class ValueType, class Policy>
+    // class Iterator {
 
-        private:
-            ConcreteStructure* structure;
+    //     private:
+    //         ConcreteStructure* structure;
 
-        public:
-            using ValType = ValueType;
-            using PolType = Policy;
+    //     public:
+    //         using ValType = ValueType;
+    //         using PolType = Policy;
 
-            Iterator(ConcreteStructure* iterble) : structure(iterble) {}
+    //         Iterator(ConcreteStructure* iterble) : structure(iterble) {}
 
-            ValueType getNext() {
-                Policy::_step(this, this->structure);
-                return 0;
-            };
+    //         virtual ValueType getNext() {
+    //             Policy::_step(this, this->structure);
+    //             return 0;
+    //         };
 
-            bool hasMore() {
-                return Policy::_hasReachedEnd(this, this->structure);
-            };
-    };
+    //         virtual bool hasMore() {
+    //             return Policy::_hasReachedEnd(this, this->structure);
+    //         };
+    // };
 
     // Uses CRTP for ConcreteStructure
     template<template<class> class ConcreteIterator, class ConcreteStructure, class ValueType>
@@ -64,10 +64,10 @@ namespace lofty {
             // };
 
             template <class ConcretePolicy>
-            ConcreteIterator<ConcretePolicy>* createIterator() { //
-            // VectorIterator<VectorForwardPolicy>* createIterator() {
-                return new ConcreteIterator<ConcretePolicy>(this); //
-                // return new VectorIterator<VectorForwardPolicy>(this);
+            // ConcreteIterator<ConcretePolicy>* createIterator() { //
+            VectorIterator<VectorForwardPolicy>* createIterator() {
+                // return new ConcreteIterator<ConcretePolicy>(this); //
+                return new VectorIterator<VectorForwardPolicy>(this);
             }
     };
 
@@ -77,12 +77,25 @@ namespace lofty {
 
     // TODO: VectorIterator should take a TypeList of config types E.g. ValType, StepType, EndType
     template<class Policy>
-    class VectorIterator : public Iterator<Vector, int, Policy> {
-        int index;
+    class VectorIterator {
+        private:
+            int index;
+            Vector* structure;
 
         public:
-            VectorIterator(Vector* vec): Iterator<Vector, int, Policy>(vec), index(0) {
-            }
+            VectorIterator(Vector* vec)
+                // : Iterator<Vector, int, Policy>(vec)
+                : index(0)
+            {}
+
+            int getNext() {
+                Policy::_step(this, this->structure);
+                return 0;
+            };
+
+            bool hasMore() {
+                return Policy::_hasReachedEnd(this, this->structure);
+            };
 
         friend class VectorForwardPolicy;
     };
@@ -125,8 +138,8 @@ int main() {
 
     Vector* vec1 = new Vector(data, 10);
 
-    auto iter = vec1->createIterator<VectorForwardPolicy>(); //
-    // auto iter = new VectorIterator<VectorForwardPolicy>(vec1);
+    // auto iter = vec1->createIterator<VectorForwardPolicy>(); //
+    auto iter = new VectorIterator<VectorForwardPolicy>(vec1);
 
     // auto iter1 = vec1.createIterator<APolicy>();
     // auto iter2 = vec1.createIterator<BPolicy>();
