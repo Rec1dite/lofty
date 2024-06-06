@@ -11,6 +11,20 @@ namespace hey {
         }
     };
 
+    template<class TValue>
+    struct StepForwardPolicy {
+        static TValue* step(TValue* current) {
+            return current + 1;
+        }
+    };
+
+    template<class TValue>
+    struct StepBackwardPolicy {
+        static TValue* step(TValue* current) {
+            return current - 1;
+        }
+    };
+
     // template<template <class> class A, class B>
     // class C {
     //     using D = A<B>;
@@ -44,11 +58,11 @@ namespace hey {
                     TValue* current;
 
                 public:
-                    typedef int B;
+                    typedef StepPolicy<TValue> StepPolicyType;
                     iterator(TValue* current) : current(current)  {}
 
                     iterator& operator++() {
-                        current = StepPolicy<TValue>::step(current);
+                        current = step(current);
                         return *this;
                     }
 
@@ -127,7 +141,7 @@ int main() {
     Array2::iterator itr2 = arr2.begin();
 
     Array arr(10);
-    Array::iterator<DefaultStepPolicy> itr = arr.begin();
+    Array::iterator<> itr = arr.begin();
 
     cout << "Current Value: " << *itr << endl;
 
