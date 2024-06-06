@@ -35,7 +35,7 @@ namespace lofty {
     template <class TList, unsigned int index>
     struct TypeAt;
 
-    template <int index>
+    template <unsigned int index>
     struct TypeAt<NullType, index> {
         using Result = NullType;
     };
@@ -87,15 +87,16 @@ namespace lofty {
     union Boolean {
     };
 
+    template <class T, class U>
+    struct Equals {
+        using Result = False;
+    };
+
     template <class T>
     struct Equals<T, T> {
         using Result = True;
     };
 
-    template <class T, class U>
-    struct Equals {
-        using Result = False;
-    };
 
     // ========== GenScatterHierarchy ==========
 
@@ -125,11 +126,22 @@ namespace lofty {
     template<template<class> class Unit>
     class GenScatterHierarchy<NullType, Unit> {};
 
+
+    // ========== AddFriends ==========
+
+    // Recurse through TList, adding a friend declaration for each type
+    template<class MyClass, class TList>
+    class AddFriends;
+
+    // Recursive case
+    template<class MyClass, class Head, class Tail>
+    class AddFriends<MyClass, Typelist<Head, Tail>>
+    : public AddFriends<MyClass, Tail> {
+        friend Head;
+    };
+
+    // Base case - Empty typelist
+    template<class MyClass>
+    class AddFriends<MyClass, NullType> : public MyClass {};
+
 }; // namespace lofty
-
-
-using namespace lofty;
-
-using List = TYPELIST_4(int, char, double, float);
-
-sci len = Length<NullType>::value;

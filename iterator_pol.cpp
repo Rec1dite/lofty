@@ -35,19 +35,22 @@ class Iterator {
         using ValType = ValueType;
         using PolType = Policy;
         using ConcIter = ConcreteIterator<Policy>;
+        #define THIS_ITER static_cast<ConcreteIterator<Policy>*>(this)
 
         Iterator(ConcreteStructure* iterble) : structure(iterble) {}
 
         virtual ValueType getCurrent() = 0;
 
         ValueType getNext() {
-            Policy::_step(static_cast<ConcIter*>(this), this->structure);
+            Policy::_step(THIS_ITER, this->structure);
             return getCurrent();
         };
 
         bool hasMore() {
-            return !Policy::_hasReachedEnd(static_cast<ConcIter*>(this), this->structure);
+            return !Policy::_hasReachedEnd(THIS_ITER, this->structure);
         };
+
+        #undef THIS_ITER
 };
 
 // Uses CRTP for ConcreteStructure
@@ -116,18 +119,17 @@ class VectorForwardPolicy {
     using This = VectorForwardPolicy;
 
     public:
+        // Required for every policy
         static void _goToStart(VectorIterator<This>* iterator, Vector* vec) {
             iterator->index = 0;
         };
 
         // Required for every policy
-        // template<class IteratorType>
         static void _step(VectorIterator<This>* iterator, Vector* vec) {
             if (iterator->index < vec->size) { iterator->index++; }
         };
 
         // Required for every policy
-        // template<class IteratorType>
         static bool _hasReachedEnd(VectorIterator<This>* iterator, Vector* vec) {
             return iterator->index >= vec->size;
         };
@@ -138,18 +140,17 @@ class VectorBackwardsPolicy {
     using This = VectorBackwardsPolicy;
 
     public:
+        // Required for every policy
         static void _goToStart(VectorIterator<This>* iterator, Vector* vec) {
             iterator->index = vec->size - 1;
         };
 
         // Required for every policy
-        // template<class IteratorType>
         static void _step(VectorIterator<This>* iterator, Vector* vec) {
             if (iterator->index > 0) { iterator->index--; }
         };
 
         // Required for every policy
-        // template<class IteratorType>
         static bool _hasReachedEnd(VectorIterator<This>* iterator, Vector* vec) {
             return iterator->index <= 0;
         };

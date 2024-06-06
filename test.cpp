@@ -1,3 +1,6 @@
+#include <iostream>
+#include "typelist.h"
+
 // template<template<class B> class A> 
 // class C : public B {
 //     typedef B D;
@@ -18,29 +21,60 @@ class C : public B {
     typedef _A E;
 };
 
-int main() {
-    C<A<B>> c;
-    return 0;
-}
 
-
-class U {};
-
-template<class Z, class W>
+template<class W>
 class X {
-    private:    int a;
-    protected:  int b;
-    public:     int c;
+    private:    int a = 1;
+    protected:  int b = 2;
+    public:     int c = 3;
     
-    friend class Y;
-    // friend class W;
-    // NOTE: Might have to use a macro to generate these
+    friend W;
 };
-
-// template<>
-// class X<float> {};
 
 class Y {
-    void test(X<int, U>* x) {
-    }
+    private:    int a = 1;
+    protected:  int b = 2;
+    public:     int c = 3;
 };
+
+class U;
+
+using Co = lofty::Typelist<U, lofty::NullType>;
+using FriendlyY = lofty::AddFriends<Y, Co>;
+
+class U {
+    public:
+        void accessX(X<U>* x) {
+            std::cout << "A: " << x->a << std::endl;
+            std::cout << "B: " << x->b << std::endl;
+            std::cout << "C: " << x->c << std::endl;
+        }
+
+        void accessFriendlyY(FriendlyY* y) {
+            // TODO: Fix; can't access a because private prevents inheritance in AddFriends<>
+            // std::cout << "A: " << y->a << std::endl;
+            std::cout << "B: " << y->b << std::endl;
+            std::cout << "C: " << y->c << std::endl;
+        }
+
+        void accessY(Y* y) {
+            // std::cout << "A: " << y->a << std::endl;
+            // std::cout << "B: " << y->b << std::endl;
+            // std::cout << "C: " << y->c << std::endl;
+        }
+};
+
+int main() {
+    X<U> x;
+    Y y;
+    FriendlyY fy;
+
+    U u;
+    u.accessX(&x);
+
+    std::cout << std::endl;
+
+    u.accessFriendlyY(&fy);
+
+    return 0;
+}
