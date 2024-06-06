@@ -66,10 +66,8 @@ class Structure {
         // };
 
         template <class ConcretePolicy>
-        // ConcreteIterator<ConcretePolicy>* createIterator() { //
-        VectorIterator<VectorForwardPolicy>* createIterator() {
-            // return new ConcreteIterator<ConcretePolicy>(this); //
-            return new VectorIterator<VectorForwardPolicy>(this);
+        ConcreteIterator<ConcretePolicy>* createIterator() {
+            return new ConcreteIterator<ConcretePolicy>(static_cast<ConcreteStructure*>(this));
         }
 };
 
@@ -141,8 +139,8 @@ int main() {
 
     Vector* vec1 = new Vector(data, 10);
 
-    // auto iter = vec1->createIterator<VectorForwardPolicy>(); //
-    auto iter = new VectorIterator<VectorForwardPolicy>(vec1);
+    auto iter = vec1->createIterator<VectorForwardPolicy>(); //
+    // auto iter = new VectorIterator<VectorForwardPolicy>(vec1);
 
     // auto iter1 = vec1.createIterator<APolicy>();
     // auto iter2 = vec1.createIterator<BPolicy>();
