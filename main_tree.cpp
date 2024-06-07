@@ -1,99 +1,148 @@
 #include <iostream>
 #include "iter.h"
+#include <queue>
+#include <stack>
+#include <random>
+#include <sstream>
 
 using namespace lofty;
+
+std::random_device rd;
+    
+std::mt19937 gen(rd());
+std::uniform_int_distribution<> dis(1, 100);
 
 //---------- Forward declarations ----------//
 template<class> class TreeIterator;
 class Tree;
-class Node;
 
 //========== Concrete Policies ==========//
-
-template<class Policy>
-class TreeIterator : public Iterator<TreeIterator, Tree, std::string, Policy> {
-    private:
-        Node* current;
-
-    public:
-        TreeIterator(Tree* tree) : current(NULL), Iterator<TreeIterator, Tree, int, Policy>(vec) {}
-
-        int getCurrent() {
-            return this->structure->at(index);
-        }
-
-    friend Policy; // Automatically add policy as friend
-};
 
 struct Node {
     public:
         Node* left;
         Node* right;
-        std::string data;
+        float data;
     
-        Node() : left(NULL), right(NULL), data("") {};
+        Node() : left(NULL), right(NULL), data(0) {};
 
-        // Expr := "(Expr|Expr) | [data]"
-        Node(std::string expr) : Node()
-        {
-            // If leaf node, set data
-            if (expr[0] == '[') {
-                this->data = expr.substr(1, expr.size() - 2);
-                return;
-            }
-            else if (expr[0] == '(') {
-                // Split into left and right
-            }
-        };
+        Node(float value) : left(NULL), right(NULL), data(value) {};
+};
 
-class Tree : public Structure<TreeIterator, Tree, std::string> {
+template<class Policy>
+class TreeIterator : public Iterator<TreeIterator, Tree, float, Policy> {
+    private:
+        //TODO : Remove current, can infer from structure
+        Node* current;
+        std::stack<Node*> stack;
+
+    public:
+        TreeIterator(Tree* tree) : current(NULL), Iterator<TreeIterator, Tree, float, Policy>(tree) {
+            Policy::_goToStart(this, tree);
+        }
+
+        float getCurrent() {
+            return current->data;
+        }
+    friend Policy; // Automatically add policy as friend
+};
+
+
+
+class Tree : public Structure<TreeIterator, Tree, float> {
     Node* root;
 
     public:
-        Tree() { this->root = new Node(); }
-        Tree(std::string expr) { this->root = new Node(expr); }
+        Tree(float depth) { 
+            this->root = full(depth);
+            std::cout << "Tree created" << std::endl;
+      }
+
+    void printBinaryTree(Node* node,float depth = 0) {
+        if (node == nullptr) return;
+
+        // Print current node
+        for (int i = 0; i < depth; ++i) {
+            std::cout << "   ";
+        }
+        std::cout << depth + 1 << ". " << node->data << std::endl;
+
+        // Print left subtree
+        printBinaryTree(node->left, depth + 1);
+
+        // Print right subtree
+        printBinaryTree(node->right, depth + 1);
+    }
+
+    void print(){
+        printBinaryTree(root);
+    }
 
     // Breadth-first search policy
     class BFSPolicy {
         using ConcIterator = TreeIterator<BFSPolicy>;
+        protected: 
+            std::queue<Node*> queue;
 
         public:
             // Required for every policy
             static void _goToStart(ConcIterator* iterator, Tree* tree) {
-                // iterator->index = 0;
+                iterator->current = tree->root;
+                iterator->queue = std::queue<Node*>();
+                iterator->queue.push(iterator->current);
             };
 
             // Required for every policy
             static void _step(ConcIterator* iterator, Tree* tree) {
-                // if (iterator->index < vec->size) { iterator->index++; }
+                iterator->queue.pop();
+                if (iterator->current->left != NULL) { iterator->queue.push(iterator->current->left); }
+                if (iterator->current->right != NULL) { iterator->queue.push(iterator->current->right); }
+                if (!iterator->queue.empty())
+                iterator->current = iterator->queue.front();
             };
 
             // Required for every policy
             static bool _hasReachedEnd(ConcIterator* iterator, Tree* tree) {
-                // return iterator->index >= vec->size;
+                return iterator->queue.empty();
             };
     };
 
     // Depth-first search policy
-    class DFSPolicy {
-        using ConcIterator = TreeIterator<DFSPolicy>;
+    // class DFSPolicy {
+    //     using ConcIterator = TreeIterator<DFSPolicy>;
 
-        public:
-            // Required for every policy
-            static void _goToStart(ConcIterator* iterator, Tree* tree) {
-                // iterator->index = vec->size - 1;
-            };
+    //     public:
+    //         // Required for every policy
+    //         static void _goToStart(ConcIterator* iterator, Tree* tree) {
+    //             // iterator->index = vec->size - 1;
+    //         };
 
-            // Required for every policy
-            static void _step(ConcIterator* iterator, Tree* tree) {
-                // if (iterator->index > 0) { iterator->index--; }
-            };
+    //         // Required for every policy
+    //         static void _step(ConcIterator* iterator, Tree* tree) {
+    //             // if (iterator->index > 0) { iterator->index--; }
+    //         };
 
-            // Required for every policy
-            static bool _hasReachedEnd(ConcIterator* iterator, Tree* tree) {
-                // return iterator->index <= 0;
-            };
-    };
+    //         // Required for every policy
+    //         static bool _hasReachedEnd(ConcIterator* iterator, Tree* tree) {
+    //             // return iterator->index <= 0;
+    //         };
+    // };
+
+
+
+    private: 
+        Node* full(int depth){
+            if (depth == 0) {
+                return new Node(dis(gen));
+            }
+
+            Node* node = new Node(dis(gen));
+            node->left = full(depth - 1);
+            node->right = full(depth - 1);
+            return node;
+        }
+
+    
 
 };
 
@@ -102,22 +151,24 @@ class Tree : public Structure<TreeIterator, Tree, std::string> {
 //========== Usage ==========//
 
 int main() {
-    int* data = new int[10] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
-
-    Tree* tree = new Tree("(([a]|[b])|[c])");
+    Tree* tree = new Tree(4);
 
     auto iterF = tree->createIterator<Tree::BFSPolicy>();
-    auto iterB = tree->createIterator<Tree::DFSPolicy>();
+    // auto iterB = tree->createIterator<Tree::DFSPolicy>();
 
+    std::cout << "Tree:" << std::endl;
+    tree->print();
+
+    std::cout << "Breatdh-first search" << std::endl;
     while(iterF->hasMore()) {
         std::cout << iterF->getCurrent() << std::endl;
         iterF->getNext();
     }
-    std::cout << "====================" << std::endl;
-    while(iterB->hasMore()) {
-        std::cout << iterB->getCurrent() << std::endl;
-        iterB->getNext();
-    }
+    // std::cout << "====================" << std::endl;
+    // std::cout << "Depth-first search" << std::endl;
+    // while(iterB->hasMore()) {
+    //     std::cout << iterB->getCurrent()->data << std::endl;
+    //     iterB->getNext();
+    // }
 
-    return 0;
 }
