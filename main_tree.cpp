@@ -169,7 +169,8 @@ int main() {
 
     std::cout << "Tree:" << std::endl;
     tree->print();
-
+    
+    std::cout << "====================" << std::endl;
     std::cout << "Breadth-first search" << std::endl;
     while(iterF.hasMore()) {
         std::cout << iterF.getCurrent() << std::endl;
