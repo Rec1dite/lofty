@@ -62,7 +62,7 @@ class Vector : public Structure<VectorIterator, Vector, int> {
 
                 // Required for every policy
                 static void _step(VectorIterator<This>* iterator, Vector* vec) {
-                    if (iterator->index < vec->size) { iterator->index++; }
+                    if (!_hasReachedEnd(iterator, vec)) { iterator->index++; }
                 };
 
                 // Required for every policy
@@ -84,12 +84,44 @@ class Vector : public Structure<VectorIterator, Vector, int> {
 
                 // Required for every policy
                 static void _step(VectorIterator<This>* iterator, Vector* vec) {
-                    if (iterator->index > 0) { iterator->index--; }
+                    if (!_hasReachedEnd(iterator, vec)) { iterator->index--; }
                 };
 
                 // Required for every policy
                 static bool _hasReachedEnd(VectorIterator<This>* iterator, Vector* vec) {
-                    return iterator->index <= 0;
+                    return iterator->index < 0;
+                };
+        };
+
+        template<unsigned int NumBounces, int Step>
+        class PingPongPolicy {
+            private:
+                using This = PingPongPolicy;
+            
+            protected:
+                int bounces = 0;
+            
+            public:
+                // Required for every policy
+                static void _goToStart(VectorIterator<This>* iterator, Vector* vec) {
+                    iterator->bounces = 0;
+                    iterator->index = (Step > 0) ? 0 : (vec->size - 1);
+                };
+
+                // Required for every policy
+                static void _step(VectorIterator<This>* iterator, Vector* vec) {
+                    if (_hasReachedEnd(iterator, vec)) { return; }
+
+                    iterator->index += (iterator->bounces % 2 == 0) ? Step : -Step;
+
+                    if (iterator->index < 0 || iterator->index >= vec->size) { iterator->bounces++; } // bounce
+
+                    iterator->index = std::max(0, std::min(iterator->index, vec->size - 1)); // clamp
+                };
+
+                // Required for every policy
+                static bool _hasReachedEnd(VectorIterator<This>* iterator, Vector* vec) {
+                    return iterator->bounces >= NumBounces;
                 };
         };
 
@@ -108,14 +140,23 @@ int main() {
     auto iterF = vec1->createIterator<Vector::ForwardPolicy>();
     auto iterB = vec1->createIterator<Vector::BackwardsPolicy>();
 
+    std::cout << "========== Forward Policy ==========" << std::endl;
     while(iterF->hasMore()) {
+        // std::cout << iterF++ << std::endl;
         std::cout << iterF->getCurrent() << std::endl;
         iterF->getNext();
     }
-    std::cout << "====================" << std::endl;
+
+    std::cout << std::endl << "========== Backwards Policy ==========" << std::endl;
     while(iterB->hasMore()) {
+        // std::cout << iterB++ << std::endl;
         std::cout << iterB->getCurrent() << std::endl;
         iterB->getNext();
+    }
+
+    std::cout << std::endl << "========== Ping Pong Policy ==========" << std::endl;
+    for(auto iterJ = vec1->createIterator<Vector::PingPongPolicy<3, 2>>(); iterJ->hasMore(); iterJ->getNext()) {
+        std::cout << iterJ->getCurrent() << std::endl;
     }
 
     return 0;
