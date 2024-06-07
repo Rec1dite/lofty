@@ -30,15 +30,12 @@ struct FriendMaker<T, TypeList<>> {};
 
 namespace lofty {
 
-    template<class BaseClass>
-    class InheritedClass : public BaseClass {};
-
     //---------- Forward declarations ----------//
     template<template<class> class, class, class, class> class Iterator;
     template<template<class> class, class, class> class Structure;
 
     template<template<class Pol> class ConcreteIterator, class ConcreteStructure, class ValueType, class Policy>
-    class Iterator {
+    class Iterator : public Policy {
 
         protected:
             ConcreteStructure* structure;
@@ -47,11 +44,13 @@ namespace lofty {
             using ValType = ValueType;
             using PolType = Policy;
             using ConcIter = ConcreteIterator<Policy>;
+            using Base = Iterator<ConcreteIterator, ConcreteStructure, ValueType, Policy>;
+
             #define THIS_ITER static_cast<ConcreteIterator<Policy>*>(this)
 
-            Iterator(ConcreteStructure* iterble) : structure(iterble) {}
-
-            virtual ValueType getCurrent() = 0;
+            Iterator(ConcreteStructure* iterable) : structure(iterable) {
+                Policy::_goToStart(THIS_ITER, this->structure);
+            }
 
             ValueType getNext() {
                 Policy::_step(THIS_ITER, this->structure);
@@ -61,6 +60,18 @@ namespace lofty {
             bool hasMore() {
                 return !Policy::_hasReachedEnd(THIS_ITER, this->structure);
             };
+
+            virtual ValueType getCurrent() = 0;
+
+            // Operator overloads
+            bool operator()() { return hasMore(); }
+            ValueType operator++() { return getNext(); }
+            ValueType operator++(ValueType) {
+                ValueType res = getCurrent();
+                Policy::_step(THIS_ITER, this->structure);
+                return res;
+            }
+            ValueType operator*() { return getCurrent(); }
 
             #undef THIS_ITER
     };
