@@ -34,7 +34,6 @@ class TreeIterator : public Iterator<TreeIterator, Tree, float, Policy> {
     private:
         //TODO : Remove current, can infer from structure
         Node* current;
-        std::stack<Node*> stack;
 
     public:
         TreeIterator(Tree* tree) : current(NULL), Iterator<TreeIterator, Tree, float, Policy>(tree) {
@@ -108,25 +107,34 @@ class Tree : public Structure<TreeIterator, Tree, float> {
     };
 
     // Depth-first search policy
-    // class DFSPolicy {
-    //     using ConcIterator = TreeIterator<DFSPolicy>;
+    class DFSPolicy {
+        using ConcIterator = TreeIterator<DFSPolicy>;
 
-    //     public:
-    //         // Required for every policy
-    //         static void _goToStart(ConcIterator* iterator, Tree* tree) {
-    //             // iterator->index = vec->size - 1;
-    //         };
+        protected: 
+            std::stack<Node*> stack;
 
-    //         // Required for every policy
-    //         static void _step(ConcIterator* iterator, Tree* tree) {
-    //             // if (iterator->index > 0) { iterator->index--; }
-    //         };
+        public:
+            // Required for every policy
+            static void _goToStart(ConcIterator* iterator, Tree* tree) {
+                iterator->current = tree->root;
+                iterator->stack = std::stack<Node*>();
+                iterator->stack.push(iterator->current);
+            };
 
-    //         // Required for every policy
-    //         static bool _hasReachedEnd(ConcIterator* iterator, Tree* tree) {
-    //             // return iterator->index <= 0;
-    //         };
-    // };
+            // Required for every policy
+            static void _step(ConcIterator* iterator, Tree* tree) {
+                iterator->stack.pop();
+                if (iterator->current->right != NULL) { iterator->stack.push(iterator->current->right); }
+                if (iterator->current->left != NULL) { iterator->stack.push(iterator->current->left); }
+                if (!iterator->stack.empty())
+                iterator->current = iterator->stack.top();
+            };
+
+            // Required for every policy
+            static bool _hasReachedEnd(ConcIterator* iterator, Tree* tree) {
+                return iterator->stack.empty();
+            };
+    };
 
 
 
@@ -142,8 +150,6 @@ class Tree : public Structure<TreeIterator, Tree, float> {
             return node;
         }
 
-    
-
 };
 
 
@@ -154,7 +160,7 @@ int main() {
     Tree* tree = new Tree(4);
 
     auto iterF = tree->createIterator<Tree::BFSPolicy>();
-    // auto iterB = tree->createIterator<Tree::DFSPolicy>();
+    auto iterB = tree->createIterator<Tree::DFSPolicy>();
 
     std::cout << "Tree:" << std::endl;
     tree->print();
@@ -164,11 +170,11 @@ int main() {
         std::cout << iterF->getCurrent() << std::endl;
         iterF->getNext();
     }
-    // std::cout << "====================" << std::endl;
-    // std::cout << "Depth-first search" << std::endl;
-    // while(iterB->hasMore()) {
-    //     std::cout << iterB->getCurrent()->data << std::endl;
-    //     iterB->getNext();
-    // }
+    std::cout << "====================" << std::endl;
+    std::cout << "Depth-first search" << std::endl;
+    while(iterB->hasMore()) {
+        std::cout << iterB->getCurrent() << std::endl;
+        iterB->getNext();
+    }
 
 }
