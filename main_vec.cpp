@@ -96,7 +96,7 @@ class Vector : public Structure<VectorIterator, Vector, int> {
         template<unsigned int NumBounces, int Step>
         class PingPongPolicy {
             private:
-                using This = PingPongPolicy;
+                using This = PingPongPolicy<NumBounces, Step>;
             
             protected:
                 int bounces = 0;
@@ -124,11 +124,61 @@ class Vector : public Structure<VectorIterator, Vector, int> {
                     return iterator->bounces >= NumBounces;
                 };
         };
+            
+        template<class MonoidOperator>
+        class FoldPolicy {
+            private:
+                using This = FoldPolicy<MonoidOperator>;
+                using ValueType = typename MonoidOperator::ValueType;
+
+            protected:
+                ValueType acc;
+
+            public:
+                ValueType getAcc() { return acc; }
+
+                // Required for every policy
+                static void _goToStart(VectorIterator<This>* iterator, Vector* vec) {
+                    iterator->acc = MonoidOperator::id;
+                    iterator->index = 0;
+                };
+
+                // Required for every policy
+                static void _step(VectorIterator<This>* iterator, Vector* vec) {
+                    iterator->acc = MonoidOperator::op(iterator->acc, iterator->getCurrent());
+                    iterator->index++;
+                };
+
+                // Required for every policy
+                static bool _hasReachedEnd(VectorIterator<This>* iterator, Vector* vec) {
+                    return iterator->index >= vec->size;
+                };
+        };
+
+        //----- Monoidal Operators -----//
+        class AddMonoid {
+            public:
+                using ValueType = int;
+
+                static const int id = 0;
+                static int op(int a, int b) { return a + b; }
+        };
+
+        class ConcatMonoid {
+            public:
+                using ValueType = std::string;
+
+                const static std::string id;
+                static std::string op(std::string a, int b) {
+                    return a + std::to_string(b);
+                };
+        };
 
     // Alternatively, if policies are declared externally (not nested), they must be declared as friends:
     // friend class MyPolicy1;
     // friend class MyPolicy2;
 };
+const std::string Vector::ConcatMonoid::id = "";
 
 //========== Usage ==========//
 
@@ -140,24 +190,42 @@ int main() {
     auto iterF = vec1->createIterator<Vector::ForwardPolicy>();
     auto iterB = vec1->createIterator<Vector::BackwardsPolicy>();
 
-    std::cout << "========== Forward Policy ==========" << std::endl;
+    std::cout << "\033[96m========== Forward Policy ==========\033[0m" << std::endl;
     while(iterF->hasMore()) {
         // std::cout << iterF++ << std::endl;
-        std::cout << iterF->getCurrent() << std::endl;
+        std::cout << iterF->getCurrent() << "  ";
         iterF->getNext();
     }
 
-    std::cout << std::endl << "========== Backwards Policy ==========" << std::endl;
+    std::cout << std::endl << "\033[96m========== Backwards Policy ==========\033[0m" << std::endl;
     while(iterB->hasMore()) {
         // std::cout << iterB++ << std::endl;
-        std::cout << iterB->getCurrent() << std::endl;
+        std::cout << iterB->getCurrent() << "  ";
         iterB->getNext();
     }
 
-    std::cout << std::endl << "========== Ping Pong Policy ==========" << std::endl;
+    std::cout << std::endl << "\033[96m========== Ping Pong Policy ==========\033[0m" << std::endl;
     for(auto iterJ = vec1->createIterator<Vector::PingPongPolicy<3, 2>>(); iterJ->hasMore(); iterJ->getNext()) {
-        std::cout << iterJ->getCurrent() << std::endl;
+        std::cout << iterJ->getCurrent() << "  ";
     }
+
+    std::cout << std::endl << "\033[96m========== Implicit Folding Policy ==========\033[0m" << std::endl;
+    std::cout << std::endl << "\033[96mAddition Monoid:\033[0m" << std::endl;
+    auto iterFoldAdd = vec1->createIterator<Vector::FoldPolicy<Vector::AddMonoid>>();
+
+    while (iterFoldAdd->hasMore()) {
+        std::cout << iterFoldAdd->getAcc() << "  ";
+        iterFoldAdd->getNext();
+    }
+    std::cout << "\033[95mResult: " << iterFoldAdd->getAcc() << "\033[0m" << std::endl;
+
+    std::cout << std::endl << "\033[96mMultiplication Monoid:\033[0m" << std::endl;
+    auto iterFoldConcat = vec1->createIterator<Vector::FoldPolicy<Vector::ConcatMonoid>>();
+    while (iterFoldConcat->hasMore()) {
+        std::cout << iterFoldConcat->getAcc() << "  ";
+        iterFoldConcat->getNext();
+    }
+    std::cout << "\033[95mResult: " << iterFoldConcat->getAcc() << "\033[0m" << std::endl;
 
     return 0;
 }
