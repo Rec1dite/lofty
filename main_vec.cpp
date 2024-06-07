@@ -155,6 +155,7 @@ int main() {
     }
 
     std::cout << std::endl << "========== Ping Pong Policy ==========" << std::endl;
+    //TODO : Make normal
     for(auto iterJ = vec1->createIterator<Vector::PingPongPolicy<3, 2>>(); iterJ->hasMore(); iterJ->getNext()) {
         std::cout << iterJ->getCurrent() << std::endl;
     }

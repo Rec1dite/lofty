@@ -65,13 +65,15 @@ namespace lofty {
 
             // Operator overloads
             bool operator()() { return hasMore(); }
-            ValueType operator++() { return getNext(); }
-            ValueType operator++(int) {
-                ValueType res = getCurrent();
-                Policy::_step(THIS_ITER, this->structure);
-                return res;
-            }
-            ValueType operator*() { return getCurrent(); }
+            Base operator++(int) { std::cout << "Jake" << std::endl; getNext(); return *static_cast<ConcIter*>(this); }
+            // Base operator++(int) {
+            //     ConcIter copy = *static_cast<ConcIter*>(this);
+            //     // copy.getNext();
+            //     std::cout << "copy++" << std::endl;
+            //     Policy::_step(THIS_ITER, this->structure);
+            //     return copy;
+            // }
+            ValueType operator*() const { return getCurrent(); }
 
             #undef THIS_ITER
     };
@@ -81,7 +83,7 @@ namespace lofty {
     class Structure {
         public:
             // TODO: Look into generating the class directly inside the iterable
-            // Then could probide a template parameter to Structure<> which defaults to NullType
+            // Then could provide a template parameter to Structure<> which defaults to NullType
             // If the user provides a class to this parameter, then it uses that as the ConcreteIterator instead
             // template<class ConcretePolicy>
             // class CustomIterator : public Iterator<ConcreteStructure, ValueType, ConcretePolicy> {
