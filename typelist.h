@@ -144,4 +144,45 @@ namespace lofty {
     template<class MyClass>
     class AddFriends<MyClass, NullType> : public MyClass {};
 
+
+    //----------
+
+    // Base case: no more types to process
+    template<typename TL>
+    struct ApplyFriends;
+
+    // Recursive case
+    template<typename T, typename... Ts>
+    struct ApplyFriends<Typelist<T, Ts...>> {
+        template<typename C>
+        struct Helper {
+            friend T;  // Declare T as a friend
+            ApplyFriends<TypeList<Ts...>>::template Helper<C> next; // Recur for the rest
+        };
+    };
+
+    // Specialization for empty TypeList
+    template<>
+    struct ApplyFriends<NullType> {
+        template<typename C>
+        struct Helper {};
+    };
+
+
+    // templated class
+    template<typename FriendsList>
+    class MyClass {
+    private:
+        // Use the helper to declare friends
+        typename ApplyFriends<FriendsList>::template Helper<MyClass<FriendsList>> friends;
+    public:
+        // Class contents go here
+    };
+
+
+    class A;
+    class B;
+
+    // MyClass<MyFriends>
+
 }; // namespace lofty

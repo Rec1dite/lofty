@@ -22,6 +22,22 @@ class C : public B {
 };
 
 
+
+template<typename... Types>
+struct TypeList {};
+
+
+template<typename T, typename Ts>
+struct FriendMaker;
+
+template<typename T, typename Head, typename... Tail>
+struct FriendMaker<T, TypeList<Head, Tail...>> {
+    friend Head;
+    FriendMaker() {
+        FriendMaker<T, TypeList<Tail...>> next;
+    }
+};
+
 template<class W>
 class X {
     private:    int a = 1;
@@ -35,6 +51,8 @@ class Y {
     private:    int a = 1;
     protected:  int b = 2;
     public:     int c = 3;
+
+    FriendMaker<Y, TypeList<X<Y>>> friendMaker;
 };
 
 class U;

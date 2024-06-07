@@ -15,14 +15,10 @@ using namespace std;
 // ValueType is the type of a single item within the Structure (that can be pointed to)
 // template<class ConcreteStructure, class ValueType>
 
-template<class BaseClass>
-class InheritedClass : public BaseClass {};
-
 //---------- Forward declarations ----------//
 template<template<class> class, class, class, class> class Iterator;
 template<template<class> class, class, class> class Structure;
 template<class> class VectorIterator;
-class VectorForwardPolicy;
 class Vector;
 
 template<template<class Pol> class ConcreteIterator, class ConcreteStructure, class ValueType, class Policy>
@@ -35,11 +31,13 @@ class Iterator {
         using ValType = ValueType;
         using PolType = Policy;
         using ConcIter = ConcreteIterator<Policy>;
+        using Base = Iterator<ConcreteIterator, ConcreteStructure, ValueType, Policy>;
+
         #define THIS_ITER static_cast<ConcreteIterator<Policy>*>(this)
 
-        Iterator(ConcreteStructure* iterble) : structure(iterble) {}
-
-        virtual ValueType getCurrent() = 0;
+        Iterator(ConcreteStructure* iterable) : structure(iterable) {
+            Policy::_goToStart(THIS_ITER, this->structure);
+        }
 
         ValueType getNext() {
             Policy::_step(THIS_ITER, this->structure);
@@ -49,6 +47,17 @@ class Iterator {
         bool hasMore() {
             return !Policy::_hasReachedEnd(THIS_ITER, this->structure);
         };
+
+        virtual ValueType getCurrent() = 0;
+
+        // Operator overloads
+        bool operator()() { return hasMore(); }
+        ValueType operator++() { return getNext(); }
+        ValueType operator++(ValueType) {
+            ValueType res = getCurrent();
+            Policy::_step(THIS_ITER, this->structure);
+            return res;
+        }
 
         #undef THIS_ITER
 };
@@ -71,8 +80,6 @@ class Structure {
 };
 
 //========== Concrete Policies ==========//
-// Use GenScatterHierarchy to build a unified policy from a set of other policies
-// E.g. First policy defines getNext(), 2nd defines hasMore(), etc.
 
 // TODO: VectorIterator should take a TypeList of config types E.g. ValType, StepType, EndType
 template<class Policy>
@@ -81,19 +88,16 @@ class VectorIterator : public Iterator<VectorIterator, Vector, int, Policy> {
         int index;
 
     public:
-        VectorIterator(Vector* vec)
-            : Iterator<VectorIterator, Vector, int, Policy>(vec), index(0)
-        {
-            Policy::_goToStart(this, vec);
-        }
+        // TODO: Work out how to get rid of this (base constructor does everything anyway)
+        using Base = typename Iterator<VectorIterator, Vector, int, Policy>::Base;
+        VectorIterator(Vector* vec) : Base(vec) {}
 
+        // Only function that each concrete iterator is required to implement
         int getCurrent() {
             return this->structure->at(index);
         }
 
-    // TODO: Look into generating these automatically using a TypeList
-    friend class VectorForwardPolicy;
-    friend class VectorBackwardsPolicy;
+    friend Policy;
 };
 
 class Vector : public Structure<VectorIterator, Vector, int> {
@@ -111,49 +115,53 @@ class Vector : public Structure<VectorIterator, Vector, int> {
             return this->data[index];
         }
 
-    friend class VectorForwardPolicy;
-    friend class VectorBackwardsPolicy;
-};
+        //========== Policies ==========//
+        class ForwardPolicy {
+            private:
+                using This = ForwardPolicy;
 
-class VectorForwardPolicy {
-    using This = VectorForwardPolicy;
+            public:
+                // Required for every policy
+                static void _goToStart(VectorIterator<This>* iterator, Vector* vec) {
+                    iterator->index = 0;
+                };
 
-    public:
-        // Required for every policy
-        static void _goToStart(VectorIterator<This>* iterator, Vector* vec) {
-            iterator->index = 0;
+                // Required for every policy
+                static void _step(VectorIterator<This>* iterator, Vector* vec) {
+                    if (iterator->index < vec->size) { iterator->index++; }
+                };
+
+                // Required for every policy
+                static bool _hasReachedEnd(VectorIterator<This>* iterator, Vector* vec) {
+                    return iterator->index >= vec->size;
+                };
         };
 
-        // Required for every policy
-        static void _step(VectorIterator<This>* iterator, Vector* vec) {
-            if (iterator->index < vec->size) { iterator->index++; }
+        // Policy to loop from end of vector to start
+        class BackwardsPolicy {
+            private:
+                using This = BackwardsPolicy;
+
+            public:
+                // Required for every policy
+                static void _goToStart(VectorIterator<This>* iterator, Vector* vec) {
+                    iterator->index = vec->size - 1;
+                };
+
+                // Required for every policy
+                static void _step(VectorIterator<This>* iterator, Vector* vec) {
+                    if (iterator->index > 0) { iterator->index--; }
+                };
+
+                // Required for every policy
+                static bool _hasReachedEnd(VectorIterator<This>* iterator, Vector* vec) {
+                    return iterator->index <= 0;
+                };
         };
 
-        // Required for every policy
-        static bool _hasReachedEnd(VectorIterator<This>* iterator, Vector* vec) {
-            return iterator->index >= vec->size;
-        };
-};
-
-// Policy to loop from end of vector to start
-class VectorBackwardsPolicy {
-    using This = VectorBackwardsPolicy;
-
-    public:
-        // Required for every policy
-        static void _goToStart(VectorIterator<This>* iterator, Vector* vec) {
-            iterator->index = vec->size - 1;
-        };
-
-        // Required for every policy
-        static void _step(VectorIterator<This>* iterator, Vector* vec) {
-            if (iterator->index > 0) { iterator->index--; }
-        };
-
-        // Required for every policy
-        static bool _hasReachedEnd(VectorIterator<This>* iterator, Vector* vec) {
-            return iterator->index <= 0;
-        };
+    // Alternatively, if policies are declared externally (not nested), they must be declared as friends:
+    // friend class MyPolicy1;
+    // friend class MyPolicy2;
 };
 
 
@@ -165,8 +173,8 @@ int main() {
 
     Vector* vec1 = new Vector(data, 10);
 
-    auto iterF = vec1->createIterator<VectorForwardPolicy>();
-    auto iterB = vec1->createIterator<VectorBackwardsPolicy>();
+    auto iterF = vec1->createIterator<Vector::ForwardPolicy>();
+    auto iterB = vec1->createIterator<Vector::BackwardsPolicy>();
 
     while(iterF->hasMore()) {
         std::cout << iterF->getCurrent() << std::endl;
