@@ -22,7 +22,7 @@ template<class> class VectorIterator;
 class Vector;
 
 template<template<class Pol> class ConcreteIterator, class ConcreteStructure, class ValueType, class Policy>
-class Iterator {
+class Iterator : public Policy {
 
     protected:
         ConcreteStructure* structure;
@@ -58,6 +58,7 @@ class Iterator {
             Policy::_step(THIS_ITER, this->structure);
             return res;
         }
+        ValueType operator*() { return getCurrent(); }
 
         #undef THIS_ITER
 };
@@ -74,7 +75,7 @@ class Structure {
         // };
 
         template <class ConcretePolicy>
-        virtual ConcreteIterator<ConcretePolicy>* createIterator() {
+        ConcreteIterator<ConcretePolicy>* createIterator() {
             return new ConcreteIterator<ConcretePolicy>(static_cast<ConcreteStructure*>(this));
         }
 };
@@ -119,6 +120,9 @@ class Vector : public Structure<VectorIterator, Vector, int> {
         class ForwardPolicy {
             private:
                 using This = ForwardPolicy;
+            
+            protected:
+                // If the policy needs to create state on the iterator, it can do so here
 
             public:
                 // Required for every policy
