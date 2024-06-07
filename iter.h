@@ -65,12 +65,12 @@ namespace lofty {
 
             // Operator overloads
             bool operator()() { return hasMore(); }
-            // ValueType operator++() { return getNext(); }
-            // ValueType operator++(ValueType) {
-            //     ValueType res = getCurrent();
-            //     Policy::_step(THIS_ITER, this->structure);
-            //     return res;
-            // }
+            ValueType operator++() { return getNext(); }
+            ValueType operator++(int) {
+                ValueType res = getCurrent();
+                Policy::_step(THIS_ITER, this->structure);
+                return res;
+            }
             ValueType operator*() { return getCurrent(); }
 
             #undef THIS_ITER
