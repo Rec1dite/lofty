@@ -57,23 +57,24 @@ namespace lofty {
                 return getCurrent();
             };
 
-            bool hasMore() {
+            bool hasMore() { // TODO: Try make this const/readonly
                 return !Policy::_hasReachedEnd(THIS_ITER, this->structure);
             };
 
             virtual ValueType getCurrent() = 0;
 
             // Operator overloads
-            bool operator()() { return hasMore(); }
-            Base operator++(int) { std::cout << "Jake" << std::endl; getNext(); return *static_cast<ConcIter*>(this); }
-            // Base operator++(int) {
-            //     ConcIter copy = *static_cast<ConcIter*>(this);
-            //     // copy.getNext();
-            //     std::cout << "copy++" << std::endl;
-            //     Policy::_step(THIS_ITER, this->structure);
-            //     return copy;
-            // }
-            ValueType operator*() const { return getCurrent(); }
+            bool operator()() { return this->hasMore(); }
+
+            ValueType operator++(int) {
+                return getNext();
+            };
+            ValueType operator++() {
+                ValueType res = getCurrent();
+                getNext();
+                return res;
+            };
+            ValueType operator*() { return getCurrent(); }
 
             #undef THIS_ITER
     };

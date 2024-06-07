@@ -191,10 +191,11 @@ int main() {
     auto iterB = vec1->createIterator<Vector::BackwardsPolicy>();
 
     std::cout << "\033[96m========== Forward Policy ==========\033[0m" << std::endl;
-    while(iterF->hasMore()) {
+    while((*iterF)()) {
         // std::cout << iterF++ << std::endl;
-        std::cout << iterF->getCurrent() << "  ";
-        iterF->getNext();
+        std::cout << *(*iterF) << "  ";
+        // iterF->getNext();
+        (*iterF)++;
     }
 
     std::cout << std::endl << "\033[96m========== Backwards Policy ==========\033[0m" << std::endl;
