@@ -179,17 +179,11 @@ int main() {
     std::cout << "Depth-first search" << std::endl;
     while(iterB->hasMore()) {
         //Working version
-        std::cout << iterB->getCurrent() << std::endl;
-        iterB->getNext();
+        // std::cout << iterB->getCurrent() << std::endl;
+        // iterB->getNext();
 
 
-        //Death version
-        
-        // std::cout << "Incrementing" << std::endl;
-        // std::cout << iterB->hasMore() << std::endl;
-        // std::cout << iterB++->getCurrent() << std::endl;
-        // std::cout << iterB->hasMore() << std::endl;
-        // std::cout << "Incremented" << std::endl;
+        std::cout << (*iterB)++ << std::endl;
     }
 
 }

@@ -82,6 +82,7 @@
         "thread": "cpp",
         "cinttypes": "cpp",
         "__nullptr": "cpp",
-        "filesystem": "cpp"
+        "filesystem": "cpp",
+        "numbers": "cpp"
     }
 }

@@ -66,10 +66,10 @@ namespace lofty {
             // Operator overloads
             bool operator()() { return this->hasMore(); }
 
-            ValueType operator++(int) {
+            ValueType operator++() {
                 return getNext();
             };
-            ValueType operator++() {
+            ValueType operator++(int) {
                 ValueType res = getCurrent();
                 getNext();
                 return res;

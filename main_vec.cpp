@@ -194,8 +194,8 @@ int main() {
     while((*iterF)()) {
         // std::cout << iterF++ << std::endl;
         std::cout << *(*iterF) << "  ";
-        // iterF->getNext();
-        (*iterF)++;
+        // iterF->getNext();       
+         (*iterF)++;
     }
 
     std::cout << std::endl << "\033[96m========== Backwards Policy ==========\033[0m" << std::endl;
