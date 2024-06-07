@@ -191,42 +191,42 @@ int main() {
     auto iterB = vec1->createIterator<Vector::BackwardsPolicy>();
 
     std::cout << "\033[96m========== Forward Policy ==========\033[0m" << std::endl;
-    while((*iterF)()) {
+    while(iterF()) {
         // std::cout << iterF++ << std::endl;
-        std::cout << *(*iterF) << "  ";
+        std::cout << *(iterF) << "  ";
         // iterF->getNext();       
-         (*iterF)++;
+         iterF++;
     }
 
     std::cout << std::endl << "\033[96m========== Backwards Policy ==========\033[0m" << std::endl;
-    while(iterB->hasMore()) {
+    while(iterB.hasMore()) {
         // std::cout << iterB++ << std::endl;
-        std::cout << iterB->getCurrent() << "  ";
-        iterB->getNext();
+        std::cout << iterB.getCurrent() << "  ";
+        iterB.getNext();
     }
 
     std::cout << std::endl << "\033[96m========== Ping Pong Policy ==========\033[0m" << std::endl;
-    for(auto iterJ = vec1->createIterator<Vector::PingPongPolicy<3, 2>>(); iterJ->hasMore(); iterJ->getNext()) {
-        std::cout << iterJ->getCurrent() << "  ";
+    for(auto iterJ = vec1->createIterator<Vector::PingPongPolicy<3, 2>>(); iterJ.hasMore(); iterJ.getNext()) {
+        std::cout << iterJ.getCurrent() << "  ";
     }
 
     std::cout << std::endl << "\033[96m========== Implicit Folding Policy ==========\033[0m" << std::endl;
     std::cout << std::endl << "\033[96mAddition Monoid:\033[0m" << std::endl;
     auto iterFoldAdd = vec1->createIterator<Vector::FoldPolicy<Vector::AddMonoid>>();
 
-    while (iterFoldAdd->hasMore()) {
-        std::cout << iterFoldAdd->getAcc() << "  ";
-        iterFoldAdd->getNext();
+    while (iterFoldAdd.hasMore()) {
+        std::cout << iterFoldAdd.getAcc() << "  ";
+        iterFoldAdd.getNext();
     }
-    std::cout << "\033[95mResult: " << iterFoldAdd->getAcc() << "\033[0m" << std::endl;
+    std::cout << "\033[95mResult: " << iterFoldAdd.getAcc() << "\033[0m" << std::endl;
 
     std::cout << std::endl << "\033[96mConcatenation Monoid:\033[0m" << std::endl;
     auto iterFoldConcat = vec1->createIterator<Vector::FoldPolicy<Vector::ConcatMonoid>>();
-    while (iterFoldConcat->hasMore()) {
-        std::cout << iterFoldConcat->getAcc() << "  ";
-        iterFoldConcat->getNext();
+    while (iterFoldConcat.hasMore()) {
+        std::cout << iterFoldConcat.getAcc() << "  ";
+        iterFoldConcat.getNext();
     }
-    std::cout << "\033[95mResult: " << iterFoldConcat->getAcc() << "\033[0m" << std::endl;
+    std::cout << "\033[95mResult: " << iterFoldConcat.getAcc() << "\033[0m" << std::endl;
 
     return 0;
 }

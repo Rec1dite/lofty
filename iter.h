@@ -91,8 +91,8 @@ namespace lofty {
             // };
 
             template <class ConcretePolicy>
-            ConcreteIterator<ConcretePolicy>* createIterator() {
-                return new ConcreteIterator<ConcretePolicy>(static_cast<ConcreteStructure*>(this));
+            ConcreteIterator<ConcretePolicy> createIterator() {
+                return ConcreteIterator<ConcretePolicy>(static_cast<ConcreteStructure*>(this));
             }
     };
 

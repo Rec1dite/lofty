@@ -171,19 +171,19 @@ int main() {
     tree->print();
 
     std::cout << "Breadth-first search" << std::endl;
-    while(iterF->hasMore()) {
-        std::cout << iterF->getCurrent() << std::endl;
-        iterF->getNext();
+    while(iterF.hasMore()) {
+        std::cout << iterF.getCurrent() << std::endl;
+        iterF.getNext();
     }
     std::cout << "====================" << std::endl;
     std::cout << "Depth-first search" << std::endl;
-    while(iterB->hasMore()) {
+    while(iterB.hasMore()) {
         //Working version
         // std::cout << iterB->getCurrent() << std::endl;
         // iterB->getNext();
 
 
-        std::cout << (*iterB)++ << std::endl;
+        std::cout << iterB++ << std::endl;
     }
 
 }
