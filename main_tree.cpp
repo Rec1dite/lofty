@@ -170,7 +170,7 @@ int main() {
     std::cout << "Tree:" << std::endl;
     tree->print();
 
-    std::cout << "Breatdh-first search" << std::endl;
+    std::cout << "Breadth-first search" << std::endl;
     while(iterF->hasMore()) {
         std::cout << iterF->getCurrent() << std::endl;
         iterF->getNext();
@@ -178,8 +178,18 @@ int main() {
     std::cout << "====================" << std::endl;
     std::cout << "Depth-first search" << std::endl;
     while(iterB->hasMore()) {
+        //Working version
         std::cout << iterB->getCurrent() << std::endl;
         iterB->getNext();
+
+
+        //Death version
+        
+        // std::cout << "Incrementing" << std::endl;
+        // std::cout << iterB->hasMore() << std::endl;
+        // std::cout << iterB++->getCurrent() << std::endl;
+        // std::cout << iterB->hasMore() << std::endl;
+        // std::cout << "Incremented" << std::endl;
     }
 
 }
