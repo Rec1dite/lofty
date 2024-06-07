@@ -5,8 +5,6 @@ using namespace lofty;
 
 //---------- Forward declarations ----------//
 template<class> class TreeIterator;
-class TreeBFSPolicy;
-class TreeDFSPolicy;
 class Tree;
 class Node;
 
@@ -18,11 +16,7 @@ class TreeIterator : public Iterator<TreeIterator, Tree, std::string, Policy> {
         Node* current;
 
     public:
-        TreeIterator(Tree* tree)
-            : Iterator<TreeIterator, Vector, int, Policy>(vec), current(NULL)
-        {
-            Policy::_goToStart(this, vec);
-        }
+        TreeIterator(Tree* tree) : current(NULL), Iterator<TreeIterator, Tree, int, Policy>(vec) {}
 
         int getCurrent() {
             return this->structure->at(index);
@@ -35,65 +29,72 @@ struct Node {
     public:
         Node* left;
         Node* right;
-        int data;
-};
+        std::string data;
+    
+        Node() : left(NULL), right(NULL), data("") {};
 
-class Tree : public Structure<TreeIterator, Tree, int> {
+        // Expr := "(Expr|Expr) | [data]"
+        Node(std::string expr) : Node()
+        {
+            // If leaf node, set data
+            if (expr[0] == '[') {
+                this->data = expr.substr(1, expr.size() - 2);
+                return;
+            }
+            else if (expr[0] == '(') {
+                // Split into left and right
+            }
+        };
+
+class Tree : public Structure<TreeIterator, Tree, std::string> {
     Node* root;
 
     public:
-        Tree() {
-            this->root = new Node();
-        }
+        Tree() { this->root = new Node(); }
+        Tree(std::string expr) { this->root = new Node(expr); }
 
-        int at(int index) {
-            return this->data[index];
-        }
+    // Breadth-first search policy
+    class BFSPolicy {
+        using ConcIterator = TreeIterator<BFSPolicy>;
 
-    // TODO: Try to automate this
-    friend class VectorForwardPolicy;
-    friend class VectorBackwardsPolicy;
-};
+        public:
+            // Required for every policy
+            static void _goToStart(ConcIterator* iterator, Tree* tree) {
+                // iterator->index = 0;
+            };
 
-class VectorForwardPolicy {
-    using This = VectorForwardPolicy;
+            // Required for every policy
+            static void _step(ConcIterator* iterator, Tree* tree) {
+                // if (iterator->index < vec->size) { iterator->index++; }
+            };
 
-    public:
-        // Required for every policy
-        static void _goToStart(VectorIterator<This>* iterator, Vector* vec) {
-            iterator->index = 0;
-        };
+            // Required for every policy
+            static bool _hasReachedEnd(ConcIterator* iterator, Tree* tree) {
+                // return iterator->index >= vec->size;
+            };
+    };
 
-        // Required for every policy
-        static void _step(VectorIterator<This>* iterator, Vector* vec) {
-            if (iterator->index < vec->size) { iterator->index++; }
-        };
+    // Depth-first search policy
+    class DFSPolicy {
+        using ConcIterator = TreeIterator<DFSPolicy>;
 
-        // Required for every policy
-        static bool _hasReachedEnd(VectorIterator<This>* iterator, Vector* vec) {
-            return iterator->index >= vec->size;
-        };
-};
+        public:
+            // Required for every policy
+            static void _goToStart(ConcIterator* iterator, Tree* tree) {
+                // iterator->index = vec->size - 1;
+            };
 
-// Policy to loop from end of vector to start
-class VectorBackwardsPolicy {
-    using This = VectorBackwardsPolicy;
+            // Required for every policy
+            static void _step(ConcIterator* iterator, Tree* tree) {
+                // if (iterator->index > 0) { iterator->index--; }
+            };
 
-    public:
-        // Required for every policy
-        static void _goToStart(VectorIterator<This>* iterator, Vector* vec) {
-            iterator->index = vec->size - 1;
-        };
+            // Required for every policy
+            static bool _hasReachedEnd(ConcIterator* iterator, Tree* tree) {
+                // return iterator->index <= 0;
+            };
+    };
 
-        // Required for every policy
-        static void _step(VectorIterator<This>* iterator, Vector* vec) {
-            if (iterator->index > 0) { iterator->index--; }
-        };
-
-        // Required for every policy
-        static bool _hasReachedEnd(VectorIterator<This>* iterator, Vector* vec) {
-            return iterator->index <= 0;
-        };
 };
 
 
@@ -103,10 +104,10 @@ class VectorBackwardsPolicy {
 int main() {
     int* data = new int[10] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
 
-    Vector* vec1 = new Vector(data, 10);
+    Tree* tree = new Tree("(([a]|[b])|[c])");
 
-    auto iterF = vec1->createIterator<VectorForwardPolicy>();
-    auto iterB = vec1->createIterator<VectorBackwardsPolicy>();
+    auto iterF = tree->createIterator<Tree::BFSPolicy>();
+    auto iterB = tree->createIterator<Tree::DFSPolicy>();
 
     while(iterF->hasMore()) {
         std::cout << iterF->getCurrent() << std::endl;

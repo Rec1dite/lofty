@@ -74,7 +74,7 @@ class Structure {
         // };
 
         template <class ConcretePolicy>
-        ConcreteIterator<ConcretePolicy>* createIterator() {
+        virtual ConcreteIterator<ConcretePolicy>* createIterator() {
             return new ConcreteIterator<ConcretePolicy>(static_cast<ConcreteStructure*>(this));
         }
 };
