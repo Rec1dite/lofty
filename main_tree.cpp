@@ -32,7 +32,6 @@ struct Node {
 template<class Policy>
 class TreeIterator : public Iterator<TreeIterator, Tree, float, Policy> {
     private:
-        //TODO : Remove current, can infer from structure
         Node* current;
 
     public:
@@ -94,8 +93,11 @@ class Tree : public Structure<TreeIterator, Tree, float> {
             // Required for every policy
             static void _step(ConcIterator* iterator, Tree* tree) {
                 iterator->queue.pop();
-                if (iterator->current->left != NULL) { iterator->queue.push(iterator->current->left); }
-                if (iterator->current->right != NULL) { iterator->queue.push(iterator->current->right); }
+                if (iterator->current->left != NULL) { 
+                    iterator->queue.push(iterator->current->left);
+                    iterator->queue.push(iterator->current->right);
+                 }
+                 
                 if (!iterator->queue.empty())
                 iterator->current = iterator->queue.front();
             };
@@ -124,8 +126,11 @@ class Tree : public Structure<TreeIterator, Tree, float> {
             // Required for every policy
             static void _step(ConcIterator* iterator, Tree* tree) {
                 iterator->stack.pop();
-                if (iterator->current->right != NULL) { iterator->stack.push(iterator->current->right); }
-                if (iterator->current->left != NULL) { iterator->stack.push(iterator->current->left); }
+                if (iterator->current->left != NULL) { 
+                    iterator->stack.push(iterator->current->right);
+                    iterator->stack.push(iterator->current->left);
+                 }
+
                 if (!iterator->stack.empty())
                 iterator->current = iterator->stack.top();
             };
