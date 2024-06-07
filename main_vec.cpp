@@ -219,7 +219,7 @@ int main() {
     }
     std::cout << "\033[95mResult: " << iterFoldAdd->getAcc() << "\033[0m" << std::endl;
 
-    std::cout << std::endl << "\033[96mMultiplication Monoid:\033[0m" << std::endl;
+    std::cout << std::endl << "\033[96mConcatenation Monoid:\033[0m" << std::endl;
     auto iterFoldConcat = vec1->createIterator<Vector::FoldPolicy<Vector::ConcatMonoid>>();
     while (iterFoldConcat->hasMore()) {
         std::cout << iterFoldConcat->getAcc() << "  ";
