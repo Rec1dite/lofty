@@ -179,7 +179,6 @@ namespace lofty {
     // class NullStructure : public Structure<ConcreteIterator, NullStructure<ConcreteIterator, ValueType>, ValueType> {};
 };
 
-
 // Porg:                                
 //                                      )\   /|        //
 //                                   .-/'-|_/ |        //

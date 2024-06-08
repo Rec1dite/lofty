@@ -1,14 +1,13 @@
-// #include <algorithm>
-// #include <vector>
-// #include <iterator>
 #include <iostream>
 
 #include "iter.h"
+#include "utils.h"
 
 using namespace lofty;
 
-template <long FROM, long TO>
+template <long FROM, long TO, long STEP = 1>
 class Range {
+    //========== Internal Iterator  ==========//
     template <class Policy>
     class iterator : public Iterator<long, Policy, iterator> {
        public:
@@ -19,9 +18,34 @@ class Range {
         long getCurrent() { return this->num; }
 
         long operator*() { return getCurrent(); };
+
+        // Preincrement
+        auto operator++() {
+            Policy::_step(this);
+            return *this;
+        }
+
+        // Postincrement
+        auto operator++(int) {
+            auto res = *this;
+            Policy::_step(this);
+            return res;
+        }
+
+        bool operator==(const iterator<Policy>& other) const {
+            return this->num == other.num;
+        }
+
+        bool operator!=(const iterator<Policy>& other) const {
+            return this->num != other.num;
+        }
+
+        bool operator>=(const iterator<Policy>& other) const {
+            return this->num >= other.num;
+        }
     };
 
-    //========== Policies ==========//
+    //========== Iterator Policies ==========//
     struct Forward {
         long num;
 
@@ -30,11 +54,11 @@ class Range {
         }
 
         static void _step(iterator<Forward>* iterator) {
-            if (!_hasReachedEnd(iterator)) iterator->num++;
+            iterator->num += STEP;
         }
 
         static bool _hasReachedEnd(iterator<Forward>* iterator) {
-            return iterator->num >= TO;
+                return iterator->num <= TO;
         }
     };
 
@@ -44,59 +68,28 @@ class Range {
     auto end() { return iterator<Forward>(TO); }
 };
 
-// template<long FROM, long TO>
-// class Range1
-// {
-//     public:
-//     // member typedefs provided through inheriting from std::iterator
-//     class iterator : public std::iterator<
-//                                 std::input_iterator_tag, // iterator_category
-//                                 long,                    // value_type
-//                                 long,                    // difference_type
-//                                 const long*,             // pointer
-//                                 long                     // reference
-//                             > {
-//         long num = FROM;
-//     public:
-//         explicit iterator(long _num = 0) : num(_num) {}
-//         iterator& operator++() { num = TO >= FROM ? num + 1: num - 1; return
-//         *this; } iterator operator++(int) { iterator retval = *this;
-//         ++(*this); return retval; } bool operator==(iterator other) const {
-//         return num == other.num; } bool operator!=(iterator other) const {
-//         return !(*this == other); } reference operator*() const { return num;
-//         }
-//     };
-//     iterator begin() { return iterator(FROM); }
-//     iterator end() { return iterator(TO >= FROM? TO + 1 : TO - 1); }
-// };
-
 int main() {
-    auto range = Range<0, 10>();
-    // auto range = Range();
-    auto itr = range.begin();
-    // std::find requires an input iterator
-    // auto itr = std::find(range.begin(), range.end(), 18);
-    itr.getNext();
-    std::cout << *itr << std::endl;            // 18
-    std::cout << *range.begin() << std::endl;  // 18
-    std::cout << *range.end() << std::endl;    // 18
+    heading("Normal Loop");
 
-    // Range::iterator also satisfies range-based for requirements
-    // for (long l : Range<3, 5>())
-    // std::cout << l << ' '; // 3 4 5
-    // std::cout << '\n';
+    auto range1 = Range<0, 10>();
 
-    // std::vector<int> ar = { 1, 2, 3, 4 };
-    // std::vector<int>::iterator ptr = ++(++ar.begin());
+    for (auto i = range1.begin(); i != range1.end(); ++i) {
+        std::cout << *i << " ";
+    }
 
-    // for (auto x = ptr; ptr >= ar.begin(); ptr--) {
-    //     std::cout << *ptr << " ";
-    // }
-}
+    heading("Normal Loop With Step", 2);
 
+    auto range2 = Range<10, 0, -2>();
 
-int main() {
-    auto range = Range<0, 10>();
-    std::cout << *range.begin() << std::endl; // 0
-    std::cout << *range.end() << std::endl;   // 10
+    for (auto i = range2.begin(); i >= range2.end(); ++i) {
+        std::cout << *i << " ";
+    }
+
+    heading("Foreach Loop", 2);
+
+    for (auto i : Range<0, 10>()) {
+        std::cout << i << " ";
+    };
+
+    std::cout << std::endl;
 }
