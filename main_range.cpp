@@ -1,7 +1,7 @@
-#include <iostream>
-#include <vector>
 #include <algorithm>
+#include <iostream>
 #include <iterator>
+#include <vector>
 
 #include "iter.h"
 #include "utils.h"
@@ -31,7 +31,7 @@ class Range {
             bool operator OP(const iterator<Policy>& other) const { \
                 return this->num OP other.num; \
             }
-        
+
         OPERATOR(==)
         OPERATOR(!=)
         OPERATOR(<=)
@@ -55,25 +55,18 @@ class Range {
         }
 
         static bool _hasReachedEnd(iterator<Forward>* iterator) {
-                return iterator->num <= TO;
+            return iterator->num <= TO;
         }
     };
 
-    public:
-        // auto begin() { return iterator<Forward>(FROM); }
-        // auto end() { return iterator<Forward>(TO); }
-        iterator<Forward> begin() const {
-            return iterator<Forward>(FROM);
-        }
-        iterator<Forward> end() const {
-            return iterator<Forward>(TO);
-        }
+   public:
+    auto begin() const { return iterator<Forward>(FROM); }
+    auto end() const { return iterator<Forward>(TO); }
 };
 
 int main() {
     auto range1 = Range<0, 10>();
     auto range2 = Range<10, 0, -2>();
-
 
     heading("Normal Loop");
     for (auto i = range1.begin(); i != range1.end(); ++i) {
@@ -98,7 +91,6 @@ int main() {
     } else {
         std::cout << "Not found\n";
     }
-
 
     std::cout << std::endl;
 

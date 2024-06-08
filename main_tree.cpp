@@ -23,19 +23,19 @@ struct Node {
         Node* left;
         Node* right;
         float data;
-    
+
         Node() : left(NULL), right(NULL), data(0) {};
 
         Node(float value) : left(NULL), right(NULL), data(value) {};
 };
 
 template<class Policy>
-class TreeIterator : public Iterator<TreeIterator, Tree, float, Policy> {
+class TreeIterator : public Iterator<float, Policy, TreeIterator, Tree> {
     private:
         Node* current;
 
     public:
-        TreeIterator(Tree* tree) : current(NULL), Iterator<TreeIterator, Tree, float, Policy>(tree) {
+        TreeIterator(Tree* tree) : current(NULL), Iterator<float, Policy, TreeIterator, Tree>(tree) {
             Policy::_goToStart(this, tree);
         }
 
@@ -45,9 +45,7 @@ class TreeIterator : public Iterator<TreeIterator, Tree, float, Policy> {
     friend Policy; // Automatically add policy as friend
 };
 
-
-
-class Tree : public Structure<TreeIterator, Tree, float> {
+class Tree : public Structure<float, TreeIterator, Tree> {
     Node* root;
 
     public:
@@ -173,12 +171,12 @@ int main() {
     std::cout << "====================" << std::endl;
     std::cout << "Breadth-first search" << std::endl;
     while(iterF.hasMore()) {
-        std::cout << iterF++ << std::endl;
+        std::cout << *iterF++ << std::endl;
     }
     std::cout << "====================" << std::endl;
     std::cout << "Depth-first search" << std::endl;
     while(iterB.hasMore()) {
-        std::cout << iterB++ << std::endl;
+        std::cout << *iterB++ << std::endl;
     }
 
 }
