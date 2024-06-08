@@ -8,9 +8,9 @@ template<class> class RangeIterator;
 template<long,long> class RangeForwardPolicy;
 class NullStructure;
 
-//========== Concrete Policies ==========//
 
 using NullRange = lofty::NullStructure<RangeIterator, int>;
+
 
 template<class Policy>
 class RangeIterator : public Iterator<RangeIterator, NullRange, int, Policy> {
@@ -57,18 +57,6 @@ template<long FROM, long TO>
 auto range() {
     return Structure<RangeIterator, NullRange, int>().createIterator<RangeForwardPolicy<FROM, TO>>();
 }
-
-// template<long FROM, long TO>
-// class RangeWrapper {
-//     public:
-//         NullStructure* range;
-
-        // RangeWrapper() { range = new NullStructure(); }
-
-        // RangeIterator<RangeForwardPolicy> begin() {
-            // return RangeIterator<RangeForwardPolicy>(range);
-        // }
-// };
 
 //========== Usage ==========//
 

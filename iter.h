@@ -96,7 +96,7 @@ namespace lofty {
             }
     };
 
-    // Stateless structure that can be used as a placeholder
+    // Stateless structure that can be used as a placeholder for self-guided iterators
     template<template<class Pol> class ConcreteIterator, class ValueType>
     class NullStructure : public Structure<ConcreteIterator, NullStructure<ConcreteIterator, ValueType>, ValueType> {};
 };
