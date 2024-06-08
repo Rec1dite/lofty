@@ -58,28 +58,38 @@ namespace lofty {
                 Policy::_goToStart(THIS_ITER, this->structure);
             }
 
-            ValueType getNext() {
+            //----- Interface -----//
+            virtual ValueType getCurrent() = 0;
+
+            ValueType pop() {
+                ValueType res = getCurrent();
                 Policy::_step(THIS_ITER, this->structure);
-                return getCurrent();
+                return res;
+            };
+
+            ConcIter& next() {
+                Policy::_step(THIS_ITER, this->structure);
+                return *THIS_ITER;
             };
 
             bool hasMore() { // TODO: Try make this const/readonly
                 return !Policy::_hasReachedEnd(THIS_ITER, this->structure);
             };
 
-            virtual ValueType getCurrent() = 0;
-
-            // Operator overloads
+            //----- Operator overloads -----//
             bool operator()() { return this->hasMore(); }
 
-            ValueType operator++() {
-                return getNext();
+            ConcIter& operator++() { // Prefix increment
+                Policy::_step(THIS_ITER, this->structure);
+                return *THIS_ITER;
             };
-            ValueType operator++(int) {
-                ValueType res = getCurrent();
-                getNext();
+
+            ConcIter operator++(int) { // Postfix increment
+                auto res = *THIS_ITER;
+                Policy::_step(THIS_ITER, this->structure);
                 return res;
             };
+
             ValueType operator*() { return getCurrent(); }
 
             #undef THIS_ITER

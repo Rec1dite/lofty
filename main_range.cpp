@@ -1,4 +1,7 @@
 #include <iostream>
+#include <vector>
+#include <algorithm>
+#include <iterator>
 
 #include "iter.h"
 #include "utils.h"
@@ -11,38 +14,32 @@ class Range {
     template <class Policy>
     class iterator : public Iterator<long, Policy, iterator> {
        public:
+        // Typedefs for iterator traits
+        using iterator_category = std::input_iterator_tag;
+        using value_type = long;
+        using difference_type = std::ptrdiff_t;
+        using pointer = const long*;
+        using reference = const long&;
+
         iterator(long num) : Iterator<long, Policy, iterator>() {
             this->num = num;
         }
 
         long getCurrent() { return this->num; }
 
-        long operator*() { return getCurrent(); };
+        #define OPERATOR(OP) \
+            bool operator OP(const iterator<Policy>& other) const { \
+                return this->num OP other.num; \
+            }
+        
+        OPERATOR(==)
+        OPERATOR(!=)
+        OPERATOR(<=)
+        OPERATOR(>=)
+        OPERATOR(<)
+        OPERATOR(>)
 
-        // Preincrement
-        auto operator++() {
-            Policy::_step(this);
-            return *this;
-        }
-
-        // Postincrement
-        auto operator++(int) {
-            auto res = *this;
-            Policy::_step(this);
-            return res;
-        }
-
-        bool operator==(const iterator<Policy>& other) const {
-            return this->num == other.num;
-        }
-
-        bool operator!=(const iterator<Policy>& other) const {
-            return this->num != other.num;
-        }
-
-        bool operator>=(const iterator<Policy>& other) const {
-            return this->num >= other.num;
-        }
+        #undef OPERATOR
     };
 
     //========== Iterator Policies ==========//
@@ -62,34 +59,48 @@ class Range {
         }
     };
 
-   public:
-    auto begin() { return iterator<Forward>(FROM); }
-
-    auto end() { return iterator<Forward>(TO); }
+    public:
+        // auto begin() { return iterator<Forward>(FROM); }
+        // auto end() { return iterator<Forward>(TO); }
+        iterator<Forward> begin() const {
+            return iterator<Forward>(FROM);
+        }
+        iterator<Forward> end() const {
+            return iterator<Forward>(TO);
+        }
 };
 
 int main() {
-    heading("Normal Loop");
-
     auto range1 = Range<0, 10>();
+    auto range2 = Range<10, 0, -2>();
 
+
+    heading("Normal Loop");
     for (auto i = range1.begin(); i != range1.end(); ++i) {
         std::cout << *i << " ";
     }
 
     heading("Normal Loop With Step", 2);
-
-    auto range2 = Range<10, 0, -2>();
-
     for (auto i = range2.begin(); i >= range2.end(); ++i) {
         std::cout << *i << " ";
     }
 
     heading("Foreach Loop", 2);
-
-    for (auto i : Range<0, 10>()) {
-        std::cout << i << " ";
+    for (long l : Range<0, 10>()) {
+        std::cout << l << " ";
     };
 
+    heading("With std::find", 2);
+    auto it = std::find(range1.begin(), range1.end(), 7);
+
+    if (it != range1.end()) {
+        std::cout << "Found: " << *it << '\n';
+    } else {
+        std::cout << "Not found\n";
+    }
+
+
     std::cout << std::endl;
+
+    return 0;
 }

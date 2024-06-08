@@ -192,21 +192,19 @@ int main() {
 
     std::cout << "\033[96m========== Forward Policy ==========\033[0m" << std::endl;
     while(iterF()) {
-        // std::cout << iterF++ << std::endl;
         std::cout << *(iterF) << "  ";
-        // iterF->getNext();       
-         iterF++;
+        iterF++;
     }
 
     std::cout << std::endl << "\033[96m========== Backwards Policy ==========\033[0m" << std::endl;
     while(iterB.hasMore()) {
         // std::cout << iterB++ << std::endl;
         std::cout << iterB.getCurrent() << "  ";
-        iterB.getNext();
+        iterB.next();
     }
 
     std::cout << std::endl << "\033[96m========== Ping Pong Policy ==========\033[0m" << std::endl;
-    for(auto iterJ = vec1->createIterator<Vector::PingPongPolicy<3, 2>>(); iterJ.hasMore(); iterJ.getNext()) {
+    for(auto iterJ = vec1->createIterator<Vector::PingPongPolicy<3, 2>>(); iterJ.hasMore(); iterJ.next()) {
         std::cout << iterJ.getCurrent() << "  ";
     }
 
@@ -216,7 +214,7 @@ int main() {
 
     while (iterFoldAdd.hasMore()) {
         std::cout << iterFoldAdd.getAcc() << "  ";
-        iterFoldAdd.getNext();
+        iterFoldAdd.next();
     }
     std::cout << "\033[95mResult: " << iterFoldAdd.getAcc() << "\033[0m" << std::endl;
 
@@ -224,7 +222,7 @@ int main() {
     auto iterFoldConcat = vec1->createIterator<Vector::FoldPolicy<Vector::ConcatMonoid>>();
     while (iterFoldConcat.hasMore()) {
         std::cout << iterFoldConcat.getAcc() << "  ";
-        iterFoldConcat.getNext();
+        iterFoldConcat.next();
     }
     std::cout << "\033[95mResult: " << iterFoldConcat.getAcc() << "\033[0m" << std::endl;
 
