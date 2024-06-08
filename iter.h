@@ -146,6 +146,8 @@ namespace lofty {
             // class CustomIterator : public Iterator<ConcreteStructure, ValueType, ConcretePolicy> {
             // };
 
+            using ValType = ValueType;
+
             template <class ConcretePolicy>
             ConcreteIterator<ConcretePolicy> createIterator() {
                 return ConcreteIterator<ConcretePolicy>(static_cast<ConcreteStructure*>(this));
@@ -154,7 +156,7 @@ namespace lofty {
 
     template<
         class ValueType,
-        template <class> class ConcreteIterator
+        template <class TValue> class ConcreteIterator
     >
     class Structure<ValueType, ConcreteIterator, NullType> {
         public:
