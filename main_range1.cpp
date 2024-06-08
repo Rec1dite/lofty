@@ -1,71 +1,68 @@
 #include <iostream>
+
 #include "iter.h"
 
 using namespace lofty;
 
 //---------- Forward declarations ----------//
-template<class> class RangeIterator;
-template<long,long> class RangeForwardPolicy;
+template <class>
+class RangeIterator;
+template <long, long>
+class RangeForwardPolicy;
 class NullStructure;
-
 
 using NullRange = lofty::NullStructure<RangeIterator, int>;
 
+template <class Policy>
+class RangeIterator : public Iterator<RangeIterator, int, Policy> {
+   private:
+    int pos = 0;
 
-template<class Policy>
-class RangeIterator : public Iterator<RangeIterator, NullRange, int, Policy> {
-    private:
-        int pos = 0;
-
-    public:
-        // TODO: Work out how to get rid of this (base constructor does everything anyway)
-        using Base = typename Iterator<RangeIterator, NullRange, int, Policy>::Base;
-        RangeIterator(NullRange* vec) : Base(vec) {}
-
-        int getCurrent() { return pos; }
+   public:
+    int getCurrent() { return pos; }
 
     friend Policy;
 };
 
-template<long FROM, long TO>
+template <long FROM, long TO>
 class RangeForwardPolicy {
-    private:
-        using This = RangeForwardPolicy<FROM, TO>;
-    
-    protected:
-        long from = FROM;
-        long to = TO;
+   private:
+    using This = RangeForwardPolicy<FROM, TO>;
 
-    public:
-        // Required for every policy
-        static void _goToStart(RangeIterator<This>* iterator, NullRange* _) {
-            iterator->pos = iterator->from;
-        };
+   protected:
+    long from = FROM;
+    long to = TO;
 
-        // Required for every policy
-        static void _step(RangeIterator<This>* iterator, NullRange* _) {
-            if (!_hasReachedEnd(iterator, _)) { iterator->pos++; }
-        };
+   public:
+    static void _goToStart(RangeIterator<This>* itr) {
+        itr->pos = FROM;
+    };
 
-        // Required for every policy
-        static bool _hasReachedEnd(RangeIterator<This>* iterator, NullRange* _) {
-            return iterator->pos >= iterator->to;
-        };
+    static void _step(RangeIterator<This>* itr) {
+        if (!_hasReachedEnd(itr, _)) {
+            itr->pos++;
+        }
+    };
+
+    static bool _hasReachedEnd(RangeIterator<This>* itr,) {
+        return itr->pos >= itr->to;
+    };
 };
 
-template<long FROM, long TO>
+template <long FROM, long TO>
 auto range() {
-    return Structure<RangeIterator, NullRange, int>().createIterator<RangeForwardPolicy<FROM, TO>>();
+    return Structure<RangeIterator, NullRange, int>()
+        .createIterator<RangeForwardPolicy<FROM, TO>>();
 }
 
 //========== Usage ==========//
 
 int main() {
-
     auto iterF = range<10, 15>();
 
-    std::cout << "\033[96m========== Forward Policy ==========\033[0m" << std::endl;
-    while(iterF()) {
+    std::cout << "\033[96m========== Forward Policy ==========\033[0m"
+              << std::endl;
+    while (iterF()) {
         std::cout << iterF++ << "  ";
     }
     std::cout << std::endl;
@@ -74,7 +71,8 @@ int main() {
 
     // auto iterF2 = range2.begin();
 
-    // std::cout << "\033[96m========== Forward Policy ==========\033[0m" << std::endl;
+    // std::cout << "\033[96m========== Forward Policy ==========\033[0m" <<
+    // std::endl;
 
     // while(iterF2()) {
     //     std::cout << iterF2++ << "  ";

@@ -13,6 +13,7 @@
 template<typename... Types>
 struct TypeList {};
 
+struct NullType {};
 
 template<typename T, typename TypeList>
 struct FriendMaker;
@@ -31,10 +32,15 @@ struct FriendMaker<T, TypeList<>> {};
 namespace lofty {
 
     //---------- Forward declarations ----------//
-    template<template<class> class, class, class, class> class Iterator;
-    template<template<class> class, class, class> class Structure;
+    template<class, class, template<class> class, class> class Iterator;
+    template<class, template<class> class, class> class Structure;
 
-    template<template<class Pol> class ConcreteIterator, class ConcreteStructure, class ValueType, class Policy>
+    template<
+        class ValueType,
+        class Policy,
+        template <class Pol> class ConcreteIterator,
+        class ConcreteStructure = NullType
+    >
     class Iterator : public Policy {
 
         protected:
@@ -44,7 +50,7 @@ namespace lofty {
             using ValType = ValueType;
             using PolType = Policy;
             using ConcIter = ConcreteIterator<Policy>;
-            using Base = Iterator<ConcreteIterator, ConcreteStructure, ValueType, Policy>;
+            using Base = Iterator<ValueType, Policy, ConcreteIterator, ConcreteStructure>;
 
             #define THIS_ITER static_cast<ConcreteIterator<Policy>*>(this)
 
@@ -79,8 +85,58 @@ namespace lofty {
             #undef THIS_ITER
     };
 
+
+    template<
+        class ValueType,
+        class Policy,
+        template <class Pol> class ConcreteIterator
+    >
+    class Iterator<ValueType, Policy, ConcreteIterator, NullType> : public Policy {
+        public:
+            using ValType = ValueType;
+            using PolType = Policy;
+            using ConcIter = ConcreteIterator<Policy>;
+            using Base = Iterator<ValueType, Policy, ConcreteIterator, NullType>;
+
+            #define THIS_ITER static_cast<ConcreteIterator<Policy>*>(this)
+
+            Iterator() {
+                Policy::_goToStart(THIS_ITER);
+            }
+
+            ValueType getNext() {
+                Policy::_step(THIS_ITER);
+                return getCurrent();
+            };
+
+            bool hasMore() {
+                return !Policy::_hasReachedEnd(THIS_ITER);
+            };
+
+            virtual ValueType getCurrent() = 0;
+
+            // Operator overloads
+            bool operator()() { return this->hasMore(); }
+
+            ValueType operator++() {
+                return getNext();
+            };
+            ValueType operator++(int) {
+                ValueType res = getCurrent();
+                getNext();
+                return res;
+            };
+            ValueType operator*() { return getCurrent(); }
+
+            #undef THIS_ITER 
+    };
+
     // Uses CRTP for ConcreteStructure
-    template<template<class> class ConcreteIterator, class ConcreteStructure, class ValueType>
+    template<
+        class ValueType,
+        template <class> class ConcreteIterator,
+        class ConcreteStructure = NullType
+    >
     class Structure {
         public:
             // TODO: Look into generating the class directly inside the iterable
@@ -96,9 +152,29 @@ namespace lofty {
             }
     };
 
+    template<
+        class ValueType,
+        template <class> class ConcreteIterator
+    >
+    class Structure<ValueType, ConcreteIterator, NullType> {
+        public:
+            // TODO: Look into generating the class directly inside the iterable
+            // Then could provide a template parameter to Structure<> which defaults to NullType
+            // If the user provides a class to this parameter, then it uses that as the ConcreteIterator instead
+            // template<class ConcretePolicy>
+            // class CustomIterator : public Iterator<ConcreteStructure, ValueType, ConcretePolicy> {
+            // };
+
+            template <class ConcretePolicy>
+            ConcreteIterator<ConcretePolicy> createIterator() {
+                return ConcreteIterator<ConcretePolicy>();
+            }
+    };
+
+
     // Stateless structure that can be used as a placeholder for self-guided iterators
-    template<template<class Pol> class ConcreteIterator, class ValueType>
-    class NullStructure : public Structure<ConcreteIterator, NullStructure<ConcreteIterator, ValueType>, ValueType> {};
+    // template<template<class Pol> class ConcreteIterator, class ValueType>
+    // class NullStructure : public Structure<ConcreteIterator, NullStructure<ConcreteIterator, ValueType>, ValueType> {};
 };
 
 

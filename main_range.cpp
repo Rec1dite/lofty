@@ -1,16 +1,16 @@
 // #include <algorithm>
-// #include <iostream>
+#include <iostream>
 // #include <vector>
 // #include <iterator>
 #include "iter.h"
 
 using namespace lofty;
+using namespace std;
 
-template<long FROM, long TO>
+// template<long FROM, long TO>
 class Range {
-    protected:
+    public:
         class NullContainer;
-
         template <class Policy>
         class iterator : public Iterator<iterator, NullContainer, long, Policy> {
             public:
@@ -24,40 +24,36 @@ class Range {
             friend Policy;
         };
 
-
         class NullContainer : public Structure<iterator, NullContainer, long> {
             public:
-                NullContainer() {}
-
                 //========== Policies ==========//
                 class ForwardPolicy {
-                    public:
-                        long num = FROM;
+                    private:
+                        using This = ForwardPolicy;
 
-                        static void _goToStart(iterator<ForwardPolicy>* iterator, NullContainer* container) {
-                            iterator->num = FROM;
+                    public:
+                        long num = 0;
+
+                        static void _goToStart(iterator<This>* iterator, NullContainer* container) {
+                            iterator->num = 0;
                         }
 
-                        static void _step(iterator<ForwardPolicy>* iterator, NullContainer* container) {
+                        static void _step(iterator<This>* iterator, NullContainer* container) {
                             if (!_hasReachedEnd(iterator, container)) { iterator->num++; }
                         }
 
-                        static bool _hasReachedEnd(iterator<ForwardPolicy>* iterator, NullContainer* container) {
-                            return iterator->num >= TO;
+                        static bool _hasReachedEnd(iterator<This>* iterator, NullContainer* container) {
+                            return iterator->num >= 5;
                         }
                 };
         };
 
-    private:
         NullContainer* container;
 
-    public:
         Range() { this->container = new NullContainer(); }
 
-        int begin()  {
-            auto var = this->container->createIterator<typename NullContainer::ForwardPolicy>();
-            // return this->container.createIterator<ForwardPolicy>();
-            return 0;
+        iterator<NullContainer::ForwardPolicy>* begin()  {
+            return container->createIterator<NullContainer::ForwardPolicy>();
         }
 };
 
@@ -89,11 +85,12 @@ class Range {
 
 int main()
 {
-    auto range = Range<15, 25>();
+    auto range = Range();
     auto itr = range.begin();
     // std::find requires an input iterator
     // auto itr = std::find(range.begin(), range.end(), 18);
-    // std::cout << *itr << '\n'; // 18
+    itr->getNext();
+    std::cout << itr->getCurrent() << '\n'; // 18
 
     // Range::iterator also satisfies range-based for requirements
     // for (long l : Range<3, 5>())

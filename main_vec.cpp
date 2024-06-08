@@ -14,13 +14,13 @@ class Vector;
 
 // TODO: VectorIterator should take a TypeList of config types E.g. ValType, StepType, EndType
 template<class Policy>
-class VectorIterator : public Iterator<VectorIterator, Vector, int, Policy> {
+class VectorIterator : public Iterator<int, Policy, VectorIterator, Vector> {
     private:
         int index;
 
     public:
         // TODO: Work out how to get rid of this (base constructor does everything anyway)
-        using Base = typename Iterator<VectorIterator, Vector, int, Policy>::Base;
+        using Base = typename Iterator<int, Policy, VectorIterator, Vector>::Base;
         VectorIterator(Vector* vec) : Base(vec) {}
 
         // Only function that each concrete iterator is required to implement
@@ -31,7 +31,7 @@ class VectorIterator : public Iterator<VectorIterator, Vector, int, Policy> {
     friend Policy;
 };
 
-class Vector : public Structure<VectorIterator, Vector, int> {
+class Vector : public Structure<int, VectorIterator, Vector> {
     int* data;
     int size;
 
