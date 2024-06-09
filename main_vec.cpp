@@ -1,5 +1,6 @@
 #include <iostream>
 #include "iter.h"
+#include "utils.h"
 
 using namespace lofty;
 
@@ -190,41 +191,40 @@ int main() {
     auto iterF = vec1->createIterator<Vector::ForwardPolicy>();
     auto iterB = vec1->createIterator<Vector::BackwardsPolicy>();
 
-    std::cout << "\033[96m========== Forward Policy ==========\033[0m" << std::endl;
+    heading("Forward Policy", 1, 1);
     while(iterF()) {
         std::cout << *(iterF) << "  ";
         iterF++;
     }
 
-    std::cout << std::endl << "\033[96m========== Backwards Policy ==========\033[0m" << std::endl;
+    heading("Backwards Policy", 2, 1);
     while(iterB.hasMore()) {
-        // std::cout << iterB++ << std::endl;
         std::cout << iterB.getCurrent() << "  ";
         iterB.next();
     }
 
-    std::cout << std::endl << "\033[96m========== Ping Pong Policy ==========\033[0m" << std::endl;
-    for(auto iterJ = vec1->createIterator<Vector::PingPongPolicy<3, 2>>(); iterJ.hasMore(); iterJ.next()) {
-        std::cout << iterJ.getCurrent() << "  ";
+    heading("Ping Pong Policy", 2, 1);
+    for(auto iterJ = vec1->createIterator<Vector::PingPongPolicy<3, 2>>(); iterJ(); iterJ++) {
+        std::cout << *iterJ << "  ";
     }
 
-    std::cout << std::endl << "\033[96m========== Implicit Folding Policy ==========\033[0m" << std::endl;
-    std::cout << std::endl << "\033[96mAddition Monoid:\033[0m" << std::endl;
+    heading("Implicit Folding Policy", 2, 1);
+    subheading("Addition Monoid", 1, 1);
     auto iterFoldAdd = vec1->createIterator<Vector::FoldPolicy<Vector::AddMonoid>>();
 
     while (iterFoldAdd.hasMore()) {
         std::cout << iterFoldAdd.getAcc() << "  ";
         iterFoldAdd.next();
     }
-    std::cout << "\033[95mResult: " << iterFoldAdd.getAcc() << "\033[0m" << std::endl;
+    result(iterFoldAdd.getAcc());
 
-    std::cout << std::endl << "\033[96mConcatenation Monoid:\033[0m" << std::endl;
+    subheading("Concatenation Monoid", 1, 1);
     auto iterFoldConcat = vec1->createIterator<Vector::FoldPolicy<Vector::ConcatMonoid>>();
     while (iterFoldConcat.hasMore()) {
         std::cout << iterFoldConcat.getAcc() << "  ";
         iterFoldConcat.next();
     }
-    std::cout << "\033[95mResult: " << iterFoldConcat.getAcc() << "\033[0m" << std::endl;
+    result(iterFoldConcat.getAcc());
 
     return 0;
 }

@@ -79,7 +79,7 @@ int main() {
     }
 
     heading("Foreach Loop", 2);
-    for (long l : Range<0, 10>()) {
+    for (long l : Range<-5, 8>()) {
         std::cout << l << " ";
     };
 
@@ -87,9 +87,9 @@ int main() {
     auto it = std::find(range1.begin(), range1.end(), 7);
 
     if (it != range1.end()) {
-        std::cout << "Found: " << *it << '\n';
+        std::cout << "\033[93mFound: " << *it << "\033[0m" << std::endl;
     } else {
-        std::cout << "Not found\n";
+        std::cout << "\033[95mNot found\033[0m" << std::endl;
     }
 
     std::cout << std::endl;

@@ -1,5 +1,6 @@
 #include <iostream>
 #include "iter.h"
+#include "utils.h"
 #include <queue>
 #include <stack>
 #include <random>
@@ -54,14 +55,20 @@ class Tree : public Structure<float, TreeIterator, Tree> {
             std::cout << "Tree created" << std::endl;
       }
 
-    void printBinaryTree(Node* node,float depth = 0) {
+    void printBinaryTree(Node* node, float depth = 0) {
         if (node == nullptr) return;
 
-        // Print current node
-        for (int i = 0; i < depth; ++i) {
-            std::cout << "   ";
+        std::string alignDots = "";
+        for (int i = 0; i < 8-depth; i++) {
+            alignDots += "...";
         }
-        std::cout << depth + 1 << ". " << node->data << std::endl;
+
+        // Print current node
+        std::cout << "\033[90m";
+        for (int i = 0; i < depth; i++) {
+            std::cout << " | ";
+        }
+        std::cout << "[" << depth + 1 << "]" << alignDots << "\033[94m " << node->data << "\033[0m" << std::endl;
 
         // Print left subtree
         printBinaryTree(node->left, depth + 1);
@@ -165,18 +172,18 @@ int main() {
     auto iterF = tree->createIterator<Tree::BFSPolicy>();
     auto iterB = tree->createIterator<Tree::DFSPolicy>();
 
-    std::cout << "Tree:" << std::endl;
+    heading("Tree", 1, 1);
     tree->print();
 
-    std::cout << "====================" << std::endl;
-    std::cout << "Breadth-first search" << std::endl;
-    while(iterF.hasMore()) {
-        std::cout << *iterF++ << std::endl;
+    subheading("Breadth-first search", 1, 1);
+    while(iterF()) {
+        std::cout << *iterF++ << " ";
     }
-    std::cout << "====================" << std::endl;
-    std::cout << "Depth-first search" << std::endl;
-    while(iterB.hasMore()) {
-        std::cout << *iterB++ << std::endl;
+
+    subheading("Depth-first search", 2, 1);
+    while(iterB()) {
+        std::cout << *iterB++ << " ";
     }
+    std::cout << std::endl;
 
 }
