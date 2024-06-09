@@ -184,6 +184,7 @@ int main() {
     while(iterB()) {
         std::cout << *iterB++ << " ";
     }
-    std::cout << std::endl;
+
+    std::cout << std::endl << std::endl;
 
 }

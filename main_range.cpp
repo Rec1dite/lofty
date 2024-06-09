@@ -92,7 +92,7 @@ int main() {
         std::cout << "\033[95mNot found\033[0m" << std::endl;
     }
 
-    std::cout << std::endl;
+    std::cout << std::endl << std::endl;
 
     return 0;
 }
