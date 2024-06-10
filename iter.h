@@ -1,3 +1,5 @@
+// Last Updated: 2024-06-10
+
 // Steps for usage:
 // 1) Create some kind of data structure that you want to iterate through. This data structure must inherit from Structure<>
 // 2) Create a generalized iterator class for that structure. This class must inherit from Iterator<>
@@ -6,19 +8,12 @@
 
 //========== Interfaces ==========//
 
-// Use policy to define how to iterate through a structure (to be converted to Visitor)
+// Use policy to define how to iterate through a structure
 // ValueType is the type of a single item within the Structure (that can be pointed to)
-// template<class ConcreteStructure, class ValueType>
 
-template<typename... Types>
-struct TypeList {};
 
-struct NullType {};
 namespace lofty {
-
-    //---------- Forward declarations ----------//
-    template<class, class, template<class> class, class> class Iterator;
-    template<class, template<class> class, class> class Structure;
+    struct NullType {};
 
     template<
         class ValueType,
@@ -27,7 +22,6 @@ namespace lofty {
         class ConcreteStructure = NullType
     >
     class Iterator : public Policy {
-
         protected:
             ConcreteStructure* structure;
 
@@ -57,7 +51,7 @@ namespace lofty {
                 return *THIS_ITER;
             };
 
-            bool hasMore() { // TODO: Try make this const/readonly
+            bool hasMore() {
                 return !Policy::_hasReachedEnd(THIS_ITER, this->structure);
             };
 
@@ -81,6 +75,7 @@ namespace lofty {
     };
 
 
+    //========== Template Specialization for Self-Guided Iterators ==========//
     template<
         class ValueType,
         class Policy,
@@ -126,7 +121,7 @@ namespace lofty {
             #undef THIS_ITER 
     };
 
-    // Uses CRTP for ConcreteStructure
+    // Uses Curiously Recursive Template Types (CRTP) for ConcreteStructure
     template<
         class ValueType,
         template <class> class ConcreteIterator,
@@ -134,13 +129,6 @@ namespace lofty {
     >
     class Structure {
         public:
-            // TODO: Look into generating the class directly inside the iterable
-            // Then could provide a template parameter to Structure<> which defaults to NullType
-            // If the user provides a class to this parameter, then it uses that as the ConcreteIterator instead
-            // template<class ConcretePolicy>
-            // class CustomIterator : public Iterator<ConcreteStructure, ValueType, ConcretePolicy> {
-            // };
-
             using ValType = ValueType;
 
             template <class ConcretePolicy>
@@ -149,18 +137,13 @@ namespace lofty {
             }
     };
 
+    //========== Template Specialization for Self-Guided Iterators ==========//
     template<
         class ValueType,
         template <class TValue> class ConcreteIterator
     >
     class Structure<ValueType, ConcreteIterator, NullType> {
         public:
-            // TODO: Look into generating the class directly inside the iterable
-            // Then could provide a template parameter to Structure<> which defaults to NullType
-            // If the user provides a class to this parameter, then it uses that as the ConcreteIterator instead
-            // template<class ConcretePolicy>
-            // class CustomIterator : public Iterator<ConcreteStructure, ValueType, ConcretePolicy> {
-            // };
 
             template <class ConcretePolicy>
             ConcreteIterator<ConcretePolicy> createIterator() {
@@ -168,13 +151,9 @@ namespace lofty {
             }
     };
 
+} // namespace lofty
 
-    // Stateless structure that can be used as a placeholder for self-guided iterators
-    // template<template<class Pol> class ConcreteIterator, class ValueType>
-    // class NullStructure : public Structure<ConcreteIterator, NullStructure<ConcreteIterator, ValueType>, ValueType> {};
-};
-
-// Porg:                                
+// Porg:
 //                                      )\   /|        //
 //                                   .-/'-|_/ |        //
 //                __            __,-' (   / \/         //
@@ -191,4 +170,4 @@ namespace lofty {
 //                \\              \\                   //
 //                 L\              L\                  //
 // "All porg are equal, but some porg are more equal then others"
-//  - Peorge Porgwell (Porg Fram) - 1945 
+//  - Peorge Porgwell (Porg Fram) - 1945
