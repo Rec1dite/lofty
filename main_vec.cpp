@@ -41,6 +41,8 @@ class Vector : public Structure<int, VectorIterator, Vector> {
             for (int i = 0; i < size; i++) { this->data[i] = data[i]; }
         }
 
+        ~Vector() { delete[] data; }
+
         int at(int index) {
             return this->data[index];
         }
@@ -225,6 +227,9 @@ int main() {
     result(iterFoldConcat.getAcc());
 
     std::cout << std::endl << std::endl;
+
+    delete vec1;
+    delete[] data;
 
     return 0;
 }
