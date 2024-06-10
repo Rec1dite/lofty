@@ -14,21 +14,6 @@ template<typename... Types>
 struct TypeList {};
 
 struct NullType {};
-
-template<typename T, typename TypeList>
-struct FriendMaker;
-
-template<typename T, typename Head, typename... Tail>
-struct FriendMaker<T, TypeList<Head, Tail...>> {
-    friend Head;
-    FriendMaker() {
-        FriendMaker<T, TypeList<Tail...>> next;
-    }
-};
-
-template<typename T>
-struct FriendMaker<T, TypeList<>> {};
-
 namespace lofty {
 
     //---------- Forward declarations ----------//

@@ -84,7 +84,7 @@ int main() {
     };
 
     heading("With std::find", 2);
-    auto it = std::find(range1.begin(), range1.end(), 7);
+    auto it = std::find(range1.begin(), range1.end(), 4);
 
     if (it != range1.end()) {
         std::cout << "\033[93mFound: " << *it << "\033[0m" << std::endl;
