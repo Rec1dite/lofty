@@ -54,7 +54,8 @@ class Range {
 
     public:
         // To be compatible with std::iterator, a structure may
-        // simply define the following two methods:
+        // simply define the following two methods, as well as
+        // comparison operators seen above.
         auto begin() const { return iterator<Forward>(FROM); }
         auto end() const { return iterator<Forward>(TO); }
 };
