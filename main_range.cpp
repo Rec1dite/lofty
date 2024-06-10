@@ -13,34 +13,27 @@ class Range {
     //========== Internal Iterator  ==========//
     template <class Policy>
     class iterator : public Iterator<long, Policy, iterator> {
-       public:
-        // Typedefs for iterator traits
-        using iterator_category = std::input_iterator_tag;
-        using value_type = long;
-        using difference_type = std::ptrdiff_t;
-        using pointer = const long*;
-        using reference = const long&;
-
-        iterator(long num) : Iterator<long, Policy, iterator>() {
-            this->num = num;
-        }
-
-        long getCurrent() { return this->num; }
-
-        #define OPERATOR(OP) \
-            bool operator OP(const iterator<Policy>& other) const { \
-                return this->num OP other.num; \
+        public:
+            iterator(long num) : Iterator<long, Policy, iterator>() {
+                this->num = num;
             }
 
-        OPERATOR(==)
-        OPERATOR(!=)
-        OPERATOR(<=)
-        OPERATOR(>=)
-        OPERATOR(<)
-        OPERATOR(>)
+            long getCurrent() { return this->num; }
 
-        #undef OPERATOR
-    };
+            #define OPERATOR(OP) \
+                bool operator OP(const iterator<Policy>& other) const { \
+                    return this->num OP other.num; \
+                }
+
+            OPERATOR(==)
+            OPERATOR(!=)
+            OPERATOR(<=)
+            OPERATOR(>=)
+            OPERATOR(<)
+            OPERATOR(>)
+
+            #undef OPERATOR
+        };
 
     //========== Iterator Policies ==========//
     struct Forward {
@@ -59,9 +52,11 @@ class Range {
         }
     };
 
-   public:
-    auto begin() const { return iterator<Forward>(FROM); }
-    auto end() const { return iterator<Forward>(TO); }
+    public:
+        // To be compatible with std::iterator, a structure may
+        // simply define the following two methods:
+        auto begin() const { return iterator<Forward>(FROM); }
+        auto end() const { return iterator<Forward>(TO); }
 };
 
 int main() {

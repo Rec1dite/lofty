@@ -93,6 +93,13 @@ namespace lofty {
             using ConcIter = ConcreteIterator<Policy>;
             using Base = Iterator<ValueType, Policy, ConcreteIterator, NullType>;
 
+            // Typedefs for iterator traits
+            using iterator_category = std::input_iterator_tag;
+            using value_type = long;
+            using difference_type = std::ptrdiff_t;
+            using pointer = const long*;
+            using reference = const long&;
+
             #define THIS_ITER static_cast<ConcreteIterator<Policy>*>(this)
 
             Iterator() {
@@ -134,13 +141,6 @@ namespace lofty {
     >
     class Structure {
         public:
-            // TODO: Look into generating the class directly inside the iterable
-            // Then could provide a template parameter to Structure<> which defaults to NullType
-            // If the user provides a class to this parameter, then it uses that as the ConcreteIterator instead
-            // template<class ConcretePolicy>
-            // class CustomIterator : public Iterator<ConcreteStructure, ValueType, ConcretePolicy> {
-            // };
-
             using ValType = ValueType;
 
             template <class ConcretePolicy>
@@ -155,13 +155,6 @@ namespace lofty {
     >
     class Structure<ValueType, ConcreteIterator, NullType> {
         public:
-            // TODO: Look into generating the class directly inside the iterable
-            // Then could provide a template parameter to Structure<> which defaults to NullType
-            // If the user provides a class to this parameter, then it uses that as the ConcreteIterator instead
-            // template<class ConcretePolicy>
-            // class CustomIterator : public Iterator<ConcreteStructure, ValueType, ConcretePolicy> {
-            // };
-
             template <class ConcretePolicy>
             ConcreteIterator<ConcretePolicy> createIterator() {
                 return ConcreteIterator<ConcretePolicy>();
