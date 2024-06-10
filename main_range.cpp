@@ -3,7 +3,7 @@
 #include <iterator>
 #include <vector>
 
-#include "iter.h"
+#include "lofty.h"
 #include "utils.h"
 
 using namespace lofty;
