@@ -53,7 +53,7 @@ class Tree : public Structure<float, TreeIterator, Tree> {
         Tree(float depth) { 
             this->root = full(depth);
             std::cout << "Tree created" << std::endl;
-      }
+        }
 
     void printBinaryTree(Node* node, float depth = 0) {
         if (node == nullptr) return;

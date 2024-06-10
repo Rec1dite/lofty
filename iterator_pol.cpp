@@ -67,13 +67,6 @@ class Iterator : public Policy {
 template<template<class> class ConcreteIterator, class ConcreteStructure, class ValueType>
 class Structure {
     public:
-        // TODO: Look into generating the class directly inside the iterable
-        // Then could probide a template parameter to Structure<> which defaults to NullType
-        // If the user provides a class to this parameter, then it uses that as the ConcreteIterator instead
-        // template<class ConcretePolicy>
-        // class CustomIterator : public Iterator<ConcreteStructure, ValueType, ConcretePolicy> {
-        // };
-
         template <class ConcretePolicy>
         ConcreteIterator<ConcretePolicy>* createIterator() {
             return new ConcreteIterator<ConcretePolicy>(static_cast<ConcreteStructure*>(this));
@@ -82,16 +75,12 @@ class Structure {
 
 //========== Concrete Policies ==========//
 
-// TODO: VectorIterator should take a TypeList of config types E.g. ValType, StepType, EndType
-
-
 template<class Policy>
 class VectorIterator : public Iterator<VectorIterator, Vector, int, Policy> {
     private:
         int index;
 
     public:
-        // TODO: Work out how to get rid of this (base constructor does everything anyway)
         using Base = typename Iterator<VectorIterator, Vector, int, Policy>::Base;
         VectorIterator(Vector* vec) : Base(vec) {}
 

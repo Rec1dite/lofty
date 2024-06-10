@@ -13,14 +13,12 @@ class Vector;
 // Use GenScatterHierarchy to build a unified policy from a set of other policies
 // E.g. First policy defines getNext(), 2nd defines hasMore(), etc.
 
-// TODO: VectorIterator should take a TypeList of config types E.g. ValType, StepType, EndType
 template<class Policy>
 class VectorIterator : public Iterator<int, Policy, VectorIterator, Vector> {
     private:
         int index;
 
     public:
-        // TODO: Work out how to get rid of this (base constructor does everything anyway)
         using Base = typename Iterator<int, Policy, VectorIterator, Vector>::Base;
         VectorIterator(Vector* vec) : Base(vec) {}
 
